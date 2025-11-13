@@ -28,12 +28,8 @@ pipeline {
         }
 
         stage('Integration Test') {
-            agent {
-                docker {
-                    image 'docker/compose:latest'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
+            agent any
+
             steps {
                 withCredentials([
                     string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
