@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class JobHuntModulithApplication {
-// undo
+
 	public static void main(String[] args) {
 		SpringApplication.run(JobHuntModulithApplication.class, args);
 	}
