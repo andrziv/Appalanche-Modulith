@@ -27,9 +27,7 @@ pipeline {
             }
         }
 
-        stage('Integration Test') {
-            agent any
-
+         stage('Integration Test') {
             steps {
                 withCredentials([
                     string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
@@ -38,16 +36,20 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            sh "docker-compose -p integration_tests_${env.BUILD_ID} up -d db"
+                            def dockerHostIp = sh(script: "ip route | awk '/default/ {print \$3}'", returnStdout: true).trim()
+                            echo "Discovered Docker Host IP as: ${dockerHostIp}"
+
+                            sh "DOCKER_HOST=tcp://${dockerHostIp}:2375 docker-compose up -d db"
 
                             sh """
                                 ./mvnw verify \
-                                -Dspring.datasource.url=jdbc:postgresql://localhost:5432/${PG_DB_NAME} \
+                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
                                 -Dspring.datasource.username=${PG_USERNAME} \
                                 -Dspring.datasource.password=${PG_PASSWORD}
                             """
                         } finally {
-                            sh "docker-compose -p integration_tests_${env.BUILD_ID} down"
+                            def dockerHostIp = sh(script: "ip route | awk '/default/ {print \$3}'", returnStdout: true).trim()
+                            sh "DOCKER_HOST=tcp://${dockerHostIp}:2375 docker-compose down"
                         }
                     }
                 }
