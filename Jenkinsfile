@@ -29,13 +29,19 @@ pipeline {
 
         stage('Integration Test') {
             steps {
-                script {
-                    try {
-                        sh 'docker-compose up -d db'
+                withCredentials([
+                    string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
+                    string(credentialsId: 'PG_USERNAME', variable: 'PG_USERNAME'),
+                    string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
+                ]) {
+                    script {
+                        try {
+                            sh 'docker-compose up -d db'
 
-                        sh './mvnw verify'
-                    } finally {
-                        sh 'docker-compose down'
+                            sh './mvnw verify'
+                        } finally {
+                            sh 'docker-compose down'
+                        }
                     }
                 }
             }
