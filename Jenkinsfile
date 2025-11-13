@@ -10,6 +10,8 @@ pipeline {
             steps {
                 git url: 'git@github.com:andrziv/JobHunt-Modulith.git',
                     credentialsId: 'github-repo-jobhunt-backend-key'
+
+                sh 'chmod +x mvnw'
             }
         }
 
@@ -58,10 +60,10 @@ pipeline {
 
     post {
         success {
-            updateGitCommitStatus name: 'Build', state: 'SUCCESS', message: 'Build and tests passed!'
+            setGitHubCommitStatus context: 'Jenkins', state: 'SUCCESS', message: 'Build and tests passed! ✅'
         }
         failure {
-            updateGitCommitStatus name: 'Build', state: 'FAILURE', message: 'Build or tests failed.'
+            setGitHubCommitStatus context: 'Jenkins', state: 'FAILURE', message: 'Build is on fire! 🔥🔥🔥 👎😤👎 🔥🔥🔥'
         }
         always {
             cleanWs()
