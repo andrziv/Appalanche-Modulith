@@ -28,6 +28,12 @@ pipeline {
         }
 
         stage('Integration Test') {
+            agent {
+                docker {
+                    image 'docker/compose:latest'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 withCredentials([
                     string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
@@ -36,16 +42,16 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            sh 'docker-compose up -d db'
+                            sh "docker-compose -p integration_tests_${env.BUILD_ID} up -d db"
 
                             sh """
                                 ./mvnw verify \
-                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
+                                -Dspring.datasource.url=jdbc:postgresql://localhost:5432/${PG_DB_NAME} \
                                 -Dspring.datasource.username=${PG_USERNAME} \
                                 -Dspring.datasource.password=${PG_PASSWORD}
                             """
                         } finally {
-                            sh 'docker-compose down'
+                            sh "docker-compose -p integration_tests_${env.BUILD_ID} down"
                         }
                     }
                 }
