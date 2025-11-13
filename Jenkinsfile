@@ -38,7 +38,12 @@ pipeline {
                         try {
                             sh 'docker-compose up -d db'
 
-                            sh './mvnw verify'
+                            sh """
+                                ./mvnw verify \
+                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
+                                -Dspring.datasource.username=${PG_USERNAME} \
+                                -Dspring.datasource.password=${PG_PASSWORD}
+                            """
                         } finally {
                             sh 'docker-compose down'
                         }
