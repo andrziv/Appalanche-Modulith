@@ -36,7 +36,7 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            sh 'docker compose up -d db'
+                            sh 'sudo docker compose up -d db'
 
                             sh """
                                 ./mvnw verify \
@@ -45,7 +45,7 @@ pipeline {
                                 -Dspring.datasource.password=${PG_PASSWORD}
                             """
                         } finally {
-                            sh 'docker-compose down'
+                            sh 'sudo docker compose down'
                         }
                     }
                 }
