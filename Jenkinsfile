@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
+        RELEASE_TAG = 'v0.${env.BUILD_NUMBER}'
     }
 
     stages {
@@ -35,19 +35,16 @@ pipeline {
                     string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
                 ]) {
                     script {
-                        def projectName = "jenkins-build-${env.BUILD_NUMBER}"
+                        def projectName = 'jenkins-build-${env.BUILD_NUMBER}'
 
                         try {
-                            sh "sudo docker compose -p ${projectName} up -d db"
+                            sh 'sudo docker compose -p ${projectName} up -d db'
 
-                            sh """
-                                ./mvnw verify \
-                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
+                            sh './mvnw verify -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
                                 -Dspring.datasource.username=${PG_USERNAME} \
-                                -Dspring.datasource.password=${PG_PASSWORD}
-                            """
+                                -Dspring.datasource.password=${PG_PASSWORD}'
                         } finally {
-                            sh "sudo docker compose -p ${projectName} down"
+                            sh 'sudo docker compose -p ${projectName} down'
                         }
                     }
                 }
@@ -63,9 +60,9 @@ pipeline {
                     sh 'git config user.email "jenkins@ci.local"'
                     sh 'git config user.name "Jenkins"'
 
-                    sh "git tag -a ${RELEASE_TAG} -m 'Release ${RELEASE_TAG} by Jenkins'"
+                    sh 'git tag -a ${RELEASE_TAG} -m \'Release ${RELEASE_TAG} by Jenkins\''
 
-                    sh "git push https://x-oauth-basic:${GITHUB_TOKEN}@github.com/andrziv/JobHunt-Modulith.git --tags"
+                    sh 'git push https://x-oauth-basic:${GITHUB_TOKEN}@github.com/andrziv/JobHunt-Modulith.git --tags'
                 }
             }
         }
