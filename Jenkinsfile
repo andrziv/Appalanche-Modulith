@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
         RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
     }
@@ -8,8 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'git@github.com:andrziv/JobHunt-Modulith.git',
-                    credentialsId: 'github-repo-jobhunt-backend-key'
+                checkout scm
 
                 sh 'chmod +x mvnw'
             }
