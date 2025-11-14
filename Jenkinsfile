@@ -34,27 +34,26 @@ pipeline {
                     string(credentialsId: 'PG_USERNAME', variable: 'PG_USERNAME'),
                     string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
                 ]) {
-                    script {
-                        def projectName = "jenkins-build-${env.BUILD_NUMBER}"
+                    withEnv(["PROJECT_NAME=jenkins-build-${env.BUILD_NUMBER}"]) {
+                        script {
+                            try {
+                                sh 'sudo docker compose -p "$PROJECT_NAME" up -d db'
 
-                        try {
-                            sh(script: "sudo docker compose -p ${projectName} up -d db")
+                                sh '''
+                                    ./mvnw verify \
+                                      -Dspring.datasource.url=jdbc:postgresql://localhost:8082/$PG_DB_NAME \
+                                      -Dspring.datasource.username=$PG_USERNAME \
+                                      -Dspring.datasource.password=$PG_PASSWORD
+                                '''
 
-                            sh(script: '''
-                                ./mvnw verify \
-                                  -Dspring.datasource.url=jdbc:postgresql://localhost:8082/$PG_DB_NAME \
-                                  -Dspring.datasource.username=$PG_USERNAME \
-                                  -Dspring.datasource.password=$PG_PASSWORD
-                            ''')
-
-                        } finally {
-                            sh(script: "sudo docker compose -p ${projectName} down")
+                            } finally {
+                                sh 'sudo docker compose -p "$PROJECT_NAME" down'
+                            }
                         }
                     }
                 }
             }
         }
-
 
         stage('Tag Release') {
             when {
