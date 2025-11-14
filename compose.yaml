@@ -30,8 +30,13 @@ services:
     ports:
       - "8082:5432"
     healthcheck:
-      # This command checks if the Postgres server is ready to accept connections
       test: [ "CMD-SHELL", "pg_isready -U $PG_USERNAME -d $PG_DB_NAME" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+        - jobhunt-net
+
+networks:
+  jobhunt-net:
+    driver: bridge

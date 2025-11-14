@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-         stage('Integration Test') {
+        stage('Integration Test') {
             steps {
                 withCredentials([
                     string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
@@ -36,20 +36,22 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            def dockerHostIp = sh(script: "ip route | awk '/default/ {print \$3}'", returnStdout: true).trim()
-                            echo "Discovered Docker Host IP as: ${dockerHostIp}"
+                            sh "docker-compose up -d db"
 
-                            sh "DOCKER_HOST=tcp://${dockerHostIp}:2375 docker-compose up -d db"
+                            def mavenImage = docker.image('maven:amazoncorretto-21')
 
-                            sh """
-                                ./mvnw verify \
-                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
-                                -Dspring.datasource.username=${PG_USERNAME} \
-                                -Dspring.datasource.password=${PG_PASSWORD}
-                            """
+                            mavenImage.inside("--network ${PROJECT_NETWORK}") {
+                                echo "Now running tests inside a temporary Maven container..."
+
+                                sh """
+                                    ./mvnw verify \
+                                    -Dspring.datasource.url=jdbc:postgresql://db:5432/${PG_DB_NAME} \
+                                    -Dspring.datasource.username=${PG_USERNAME} \
+                                    -Dspring.datasource.password=${PG_PASSWORD}
+                                """
+                            }
                         } finally {
-                            def dockerHostIp = sh(script: "ip route | awk '/default/ {print \$3}'", returnStdout: true).trim()
-                            sh "DOCKER_HOST=tcp://${dockerHostIp}:2375 docker-compose down"
+                            sh "docker-compose down"
                         }
                     }
                 }
