@@ -38,13 +38,13 @@ pipeline {
                         def projectName = "jenkins-build-${env.BUILD_NUMBER}"
 
                         try {
-                            sh 'sudo docker compose -p ${projectName} up -d db'
+                            sh "sudo docker compose -p ${projectName} up -d db"
 
                             sh './mvnw verify -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
                                 -Dspring.datasource.username=${PG_USERNAME} \
                                 -Dspring.datasource.password=${PG_PASSWORD}'
                         } finally {
-                            sh 'sudo docker compose -p ${projectName} down'
+                            sh "sudo docker compose -p ${projectName} down"
                         }
                     }
                 }
