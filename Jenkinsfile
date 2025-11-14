@@ -43,7 +43,7 @@ pipeline {
 
                                 sh '''
                                     ./mvnw verify \
-                                      -Dspring.datasource.url="jdbc:postgresql://localhost:8082/$PG_DB_NAME" \
+                                      -Dspring.datasource.url="jdbc:postgresql://host.docker.internal:8082/$PG_DB_NAME" \
                                       -Dspring.datasource.username="$PG_USERNAME" \
                                       -Dspring.datasource.password="$PG_PASSWORD"
                                 '''
