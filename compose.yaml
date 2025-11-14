@@ -25,7 +25,6 @@ services:
 
   db:
     image: postgres
-    container_name: ${COMPOSE_DB_CONTAINER_NAME:-}
     environment:
       - POSTGRES_USER=$PG_USERNAME
       - POSTGRES_PASSWORD=$PG_PASSWORD
