@@ -36,22 +36,16 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            sh "docker-compose up -d db"
+                            sh 'docker-compose up -d db'
 
-                            def mavenImage = docker.image('maven:amazoncorretto-21')
-
-                            mavenImage.inside("--network ${PROJECT_NETWORK}") {
-                                echo "Now running tests inside a temporary Maven container..."
-
-                                sh """
-                                    ./mvnw verify \
-                                    -Dspring.datasource.url=jdbc:postgresql://db:5432/${PG_DB_NAME} \
-                                    -Dspring.datasource.username=${PG_USERNAME} \
-                                    -Dspring.datasource.password=${PG_PASSWORD}
-                                """
-                            }
+                            sh """
+                                ./mvnw verify \
+                                -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
+                                -Dspring.datasource.username=${PG_USERNAME} \
+                                -Dspring.datasource.password=${PG_PASSWORD}
+                            """
                         } finally {
-                            sh "docker-compose down"
+                            sh 'docker-compose down'
                         }
                     }
                 }
