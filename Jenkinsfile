@@ -38,7 +38,7 @@ pipeline {
                         def projectName = "jenkins-build-${env.BUILD_NUMBER}"
 
                         try {
-                            sh(script: "docker compose -p ${projectName} up -d db")
+                            sh(script: "sudo docker compose -p ${projectName} up -d db")
 
                             sh(script: """
                                 ./mvnw verify \
@@ -48,7 +48,7 @@ pipeline {
                             """)
 
                         } finally {
-                            sh(script: "docker compose -p ${projectName} down")
+                            sh(script: "sudo docker compose -p ${projectName} down")
                         }
                     }
                 }
