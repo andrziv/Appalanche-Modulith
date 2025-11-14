@@ -35,8 +35,10 @@ pipeline {
                     string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
                 ]) {
                     script {
+                        def projectName = "jenkins-build-${env.BUILD_NUMBER}"
+
                         try {
-                            sh 'sudo docker compose up -d db'
+                             sh 'sudo PG_DB_NAME="$PG_DB_NAME" PG_USERNAME="$PG_USERNAME" PG_PASSWORD="$PG_PASSWORD" docker compose -p ${projectName} up -d db'
 
                             sh """
                                 ./mvnw verify \
@@ -45,7 +47,7 @@ pipeline {
                                 -Dspring.datasource.password=${PG_PASSWORD}
                             """
                         } finally {
-                            sh 'sudo docker compose down'
+                            sh 'sudo PG_DB_NAME="$PG_DB_NAME" PG_USERNAME="$PG_USERNAME" PG_PASSWORD="$PG_PASSWORD" docker compose -p ${projectName} down'
                         }
                     }
                 }
