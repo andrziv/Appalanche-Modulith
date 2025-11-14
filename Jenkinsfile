@@ -59,7 +59,10 @@ pipeline {
 
         stage('Tag Release') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                }
             }
             steps {
                 withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
