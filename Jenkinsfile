@@ -76,10 +76,30 @@ pipeline {
 
     post {
         success {
-            setGitHubCommitStatus context: 'Jenkins', state: 'SUCCESS', message: 'Build and tests passed! ✅'
+            echo 'Setting GitHub commit status to SUCCESS'
+            step([
+                $class: 'GitHubCommitStatusSetter',
+                contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'Jenkins'],
+                statusResultSource: [
+                    $class: 'ConditionalStatusResultSource',
+                    results: [
+                        [$class: 'AnyBuildResult', state: 'SUCCESS', message: 'Build and tests passed! ✅']
+                    ]
+                ]
+            ])
         }
         failure {
-            setGitHubCommitStatus context: 'Jenkins', state: 'FAILURE', message: 'Build is on fire! 🔥🔥🔥 👎😤👎 🔥🔥🔥'
+            echo 'Setting GitHub commit status to FAILURE'
+            step([
+                $class: 'GitHubCommitStatusSetter',
+                contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'Jenkins'],
+                statusResultSource: [
+                    $class: 'ConditionalStatusResultSource',
+                    results: [
+                        [$class: 'AnyBuildResult', state: 'FAILURE', message: 'Build is on fire! 🔥🔥🔥 👎😤👎 🔥🔥🔥']
+                    ]
+                ]
+            ])
         }
         always {
             cleanWs()
