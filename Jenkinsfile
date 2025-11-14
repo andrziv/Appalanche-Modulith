@@ -49,7 +49,7 @@ pipeline {
                                 '''
 
                             } finally {
-                                sh 'sudo docker compose -p "$PROJECT_NAME" down'
+                                sh 'sudo docker compose -p "$PROJECT_NAME" down --volumes'
                             }
                         }
                     }
