@@ -41,12 +41,12 @@ pipeline {
 
                                 sh 'sleep 10'
 
-                                sh """
+                                sh '''
                                     ./mvnw verify \
-                                      -Dspring.datasource.url=jdbc:postgresql://localhost:8082/${PG_DB_NAME} \
-                                      -Dspring.datasource.username=${PG_USERNAME} \
-                                      -Dspring.datasource.password=${PG_PASSWORD}
-                                """
+                                      -Dspring.datasource.url="jdbc:postgresql://localhost:8082/$PG_DB_NAME" \
+                                      -Dspring.datasource.username="$PG_USERNAME" \
+                                      -Dspring.datasource.password="$PG_PASSWORD"
+                                '''
 
                             } finally {
                                 sh 'sudo docker compose -p "$PROJECT_NAME" down'
