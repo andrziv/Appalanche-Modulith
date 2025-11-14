@@ -19,10 +19,13 @@ services:
       - SERVER_PORT=8080
     ports:
       - "8081:8080"
+    networks:
+      - default
+      - jobhunt-net
 
   db:
     image: postgres
-    container_name: db_postgres
+    container_name: ${COMPOSE_DB_CONTAINER_NAME:-}
     environment:
       - POSTGRES_USER=$PG_USERNAME
       - POSTGRES_PASSWORD=$PG_PASSWORD
@@ -35,7 +38,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-        - jobhunt-net
+      - default
+      - jobhunt-net
 
 networks:
   jobhunt-net:
