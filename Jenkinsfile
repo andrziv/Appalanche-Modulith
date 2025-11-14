@@ -36,7 +36,7 @@ pipeline {
                 ]) {
                     script {
                         try {
-                            sh 'docker-compose up -d db'
+                            sh 'docker compose up -d db'
 
                             sh """
                                 ./mvnw verify \
