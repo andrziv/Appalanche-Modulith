@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        RELEASE_TAG = 'v0.${env.BUILD_NUMBER}'
+        RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
     }
 
     stages {
@@ -35,7 +35,7 @@ pipeline {
                     string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
                 ]) {
                     script {
-                        def projectName = 'jenkins-build-${env.BUILD_NUMBER}'
+                        def projectName = "jenkins-build-${env.BUILD_NUMBER}"
 
                         try {
                             sh 'sudo docker compose -p ${projectName} up -d db'
