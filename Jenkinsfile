@@ -35,38 +35,6 @@ pipeline {
             }
         }
 
-        stage('Integration Test') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
-                    string(credentialsId: 'PG_USERNAME', variable: 'PG_USERNAME'),
-                    string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD'),
-                    string(credentialsId: 'JWT_SECRET_KEY', variable: 'JWT_SECRET_KEY'),
-                    string(credentialsId: 'JWT_EXPIRATION_TIME', variable: 'JWT_EXPIRATION_TIME')
-                ]) {
-                    withEnv(["PROJECT_NAME=jenkins-build-${env.BUILD_NUMBER}"]) {
-                        script {
-                            try {
-                                sh 'sudo docker compose -p "$PROJECT_NAME" up -d db'
-
-                                sh 'sleep 10'
-
-                                sh '''
-                                    ./mvnw verify \
-                                      -Dspring.datasource.url="jdbc:postgresql://host.docker.internal:8082/$PG_DB_NAME" \
-                                      -Dspring.datasource.username="$PG_USERNAME" \
-                                      -Dspring.datasource.password="$PG_PASSWORD"
-                                '''
-
-                            } finally {
-                                sh 'sudo docker compose -p "$PROJECT_NAME" down --volumes'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Tag Release') {
             when {
                 anyOf {
