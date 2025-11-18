@@ -26,7 +26,12 @@ pipeline {
 
         stage('Unit Test') {
             steps {
-                sh './mvnw test'
+                withCredentials([
+                    string(credentialsId: 'JWT_SECRET_KEY', variable: 'JWT_SECRET_KEY'),
+                    string(credentialsId: 'JWT_EXPIRATION_TIME', variable: 'JWT_EXPIRATION_TIME')
+                ]) {
+                    sh './mvnw test'
+                }
             }
         }
 
@@ -35,7 +40,9 @@ pipeline {
                 withCredentials([
                     string(credentialsId: 'PG_DB_NAME', variable: 'PG_DB_NAME'),
                     string(credentialsId: 'PG_USERNAME', variable: 'PG_USERNAME'),
-                    string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD')
+                    string(credentialsId: 'PG_PASSWORD', variable: 'PG_PASSWORD',
+                    string(credentialsId: 'JWT_SECRET_KEY', variable: 'JWT_SECRET_KEY'),
+                    string(credentialsId: 'JWT_EXPIRATION_TIME', variable: 'JWT_EXPIRATION_TIME')
                 ]) {
                     withEnv(["PROJECT_NAME=jenkins-build-${env.BUILD_NUMBER}"]) {
                         script {
