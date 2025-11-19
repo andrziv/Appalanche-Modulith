@@ -1,6 +1,6 @@
-package com.jobhunt.backend.JobHunt_Modulith.authentication.configs;
+package com.jobhunt.backend.JobHunt_Modulith.security.configs;
 
-import com.jobhunt.backend.JobHunt_Modulith.authentication.helper.JwtHelper;
+import com.jobhunt.backend.JobHunt_Modulith.security.helper.JwtHelper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,8 +9,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,14 +21,10 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
-
     private final JwtHelper jwtHelper;
-    private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtHelper jwtHelper, UserDetailsService userDetailsService,
-                                   HandlerExceptionResolver handlerExceptionResolver) {
+    public JwtAuthenticationFilter(JwtHelper jwtHelper, HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtHelper = jwtHelper;
-        this.userDetailsService = userDetailsService;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
@@ -49,12 +45,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails = User.builder()
+                                              .username(userEmail)
+                                              .password("")
+                                              .authorities(jwtHelper.extractAuthorities(jwt))
+                                              .build();
 
                 if (jwtHelper.isTokenValid(jwt, userDetails)) {
                     var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext()
+                                         .setAuthentication(authToken);
                 }
             }
 

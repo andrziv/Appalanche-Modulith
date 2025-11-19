@@ -1,4 +1,4 @@
-package com.jobhunt.backend.JobHunt_Modulith.authentication.configs;
+package com.jobhunt.backend.JobHunt_Modulith.authentication.config;
 
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.AccountRepository;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,7 @@ public class ApplicationConfiguration {
     @Bean
     UserDetailsService userDetailsService() {
         return username -> accountRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                                            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean

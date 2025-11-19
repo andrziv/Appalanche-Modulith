@@ -1,8 +1,11 @@
 package com.jobhunt.backend.JobHunt_Modulith.authentication.endpoint;
 
-import com.jobhunt.backend.JobHunt_Modulith.authentication.business.*;
-import com.jobhunt.backend.JobHunt_Modulith.authentication.helper.JwtHelper;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.AccountService;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.LoginRequest;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.LoginResponse;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.SignupRequest;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.Account;
+import com.jobhunt.backend.JobHunt_Modulith.security.helper.JwtHelper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

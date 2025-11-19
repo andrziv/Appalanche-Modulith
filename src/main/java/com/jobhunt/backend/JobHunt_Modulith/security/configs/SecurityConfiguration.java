@@ -1,4 +1,4 @@
-package com.jobhunt.backend.JobHunt_Modulith.authentication.configs;
+package com.jobhunt.backend.JobHunt_Modulith.security.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,15 +34,15 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(OPTIONS).permitAll()
-                        .requestMatchers("/authenticate/**", "/actuator/**").permitAll()
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(OPTIONS).permitAll()
+                    .requestMatchers("/authenticate/**", "/actuator/**").permitAll()
+                    .anyRequest().authenticated())
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
