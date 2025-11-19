@@ -1,4 +1,4 @@
-package com.jobhunt.backend.JobHunt_Modulith.authentication.business;
+package com.jobhunt.backend.JobHunt_Modulith.authentication.persistence;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

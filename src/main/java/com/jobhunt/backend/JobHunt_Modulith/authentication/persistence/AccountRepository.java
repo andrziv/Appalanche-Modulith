@@ -1,6 +1,5 @@
 package com.jobhunt.backend.JobHunt_Modulith.authentication.persistence;
 
-import com.jobhunt.backend.JobHunt_Modulith.authentication.business.Account;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

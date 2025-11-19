@@ -2,6 +2,7 @@ package com.jobhunt.backend.JobHunt_Modulith.authentication.endpoint;
 
 import com.jobhunt.backend.JobHunt_Modulith.authentication.business.*;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.helper.JwtHelper;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.Account;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

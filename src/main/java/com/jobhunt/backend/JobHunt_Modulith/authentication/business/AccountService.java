@@ -1,6 +1,7 @@
 package com.jobhunt.backend.JobHunt_Modulith.authentication.business;
 
 import com.jobhunt.backend.JobHunt_Modulith.authentication.business.exceptions.DuplicationException;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.Account;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.AccountRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
