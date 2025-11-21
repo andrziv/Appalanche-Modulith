@@ -1,10 +1,13 @@
 package com.jobhunt.backend.JobHunt_Modulith.security.configs;
 
 import com.jobhunt.backend.JobHunt_Modulith.security.helper.JwtHelper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,18 +17,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final HandlerExceptionResolver handlerExceptionResolver;
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private final JwtHelper jwtHelper;
 
-    public JwtAuthenticationFilter(JwtHelper jwtHelper, HandlerExceptionResolver handlerExceptionResolver) {
+    public JwtAuthenticationFilter(JwtHelper jwtHelper) {
         this.jwtHelper = jwtHelper;
-        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
@@ -54,14 +56,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (jwtHelper.isTokenValid(jwt, userDetails)) {
                     var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext()
-                                         .setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+        } catch (ExpiredJwtException exception) {
+            logger.warn("Expired token detected for request to: {}", request.getRequestURI());
+            logger.debug("Expired token: {}", exception.getMessage());
 
-            filterChain.doFilter(request, response);
+            request.setAttribute("jwt_error", "Token has expired");
+            request.setAttribute("jwt_error_message", exception.getMessage());
         } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+            logger.warn("Invalid token detected for request to: {}", request.getRequestURI());
+            logger.debug("Invalid token: {}", exception.getMessage());
+
+            request.setAttribute("jwt_error", "Invalid Token");
+            request.setAttribute("jwt_error_message", exception.getMessage());
         }
+
+        filterChain.doFilter(request, response);
     }
 }

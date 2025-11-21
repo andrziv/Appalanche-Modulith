@@ -1,16 +1,10 @@
-package com.jobhunt.backend.JobHunt_Modulith.authentication.business;
+package com.jobhunt.backend.JobHunt_Modulith.authentication.business.request_response;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record SignupRequest(
-        @NotBlank(message = "First name cannot be blank")
-        String firstname,
-
-        @NotBlank(message = "Last name cannot be blank")
-        String surname,
-
+public record LoginRequest(
         @Email(message = "Invalid email format")
         @NotBlank(message = "Email cannot be blank")
         String email,

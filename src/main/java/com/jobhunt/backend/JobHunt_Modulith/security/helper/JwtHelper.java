@@ -23,9 +23,6 @@ public class JwtHelper {
 
     private final JwtParser jwtParser;
 
-    // Future self: these env variables have dummy "defaults" because building through maven fails without these.
-    // For some reason Spring can't read the env file secrets during build? So we just use these.
-    // TODO: maybe look into a way that allows the server to fail in case improper values were handed here?
     public JwtHelper(@Value("${security.jwt.secret-key}") String secret,
                      @Value("${security.jwt.expiration-time}") long expiration) {
         this.jwtExpiration = expiration;

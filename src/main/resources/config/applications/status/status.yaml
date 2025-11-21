@@ -1,0 +1,50 @@
+jobhunt:
+  status:
+    statuses:
+      - code: "APPLIED"
+        label: "Applied"
+        maxRounds: 1
+        colour: "#3498db"
+        textColour: "#bebebe"
+
+      - code: "ONLINE_ASSESSMENT"
+        label: "Online Assessment"
+        maxRounds: 1
+        colour: "#fe7a2b"
+        textColour: "#bebebe"
+
+      - code: "PHONE_INTERVIEW_{0}"
+        label: "Phone Interview"
+        maxRounds: 10
+        colour: "#f1c40f"
+        textColour: "#555555"
+
+      - code: "INTERVIEW_{0}"
+        label: "Interview"
+        maxRounds: 10
+        colour: "#f1c40f"
+        textColour: "#555555"
+
+      - code: "TECHNICAL_INTERVIEW_{0}"
+        label: "Technical Interview"
+        maxRounds: 10
+        colour: "#f1c40f"
+        textColour: "#555555"
+
+      - code: "OFFER_RECEIVED"
+        label: "Offer Received"
+        maxRounds: 1
+        colour: "#2ecc71"
+        textColour: "#bebebe"
+
+      - code: "REJECTED"
+        label: "Rejected"
+        maxRounds: 1
+        colour: "#000000"
+        textColour: "#ffffff"
+
+      - code: "WITHDREW"
+        label: "Withdrew"
+        maxRounds: 1
+        colour: "#000000"
+        textColour: "#ffffff"

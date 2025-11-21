@@ -1,7 +1,7 @@
 package com.jobhunt.backend.JobHunt_Modulith.authentication.endpoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jobhunt.backend.JobHunt_Modulith.authentication.business.SignupRequest;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.request_response.SignupRequest;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +46,9 @@ public class AccountIntegrationTests {
         SignupRequest request = new SignupRequest("Test", "User", "test.user@gmail.com", "1definitely2Secure");
 
         mockMvc.perform(post("/authenticate/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                       .contentType(MediaType.APPLICATION_JSON)
+                       .content(objectMapper.writeValueAsString(request)))
+               .andExpect(status().isCreated());
 
         var account = accountRepository.findByEmail("test.user@gmail.com");
         assertThat(account).isPresent();

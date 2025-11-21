@@ -1,6 +1,8 @@
 package com.jobhunt.backend.JobHunt_Modulith.authentication.business;
 
 import com.jobhunt.backend.JobHunt_Modulith.authentication.business.exceptions.DuplicationException;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.request_response.LoginRequest;
+import com.jobhunt.backend.JobHunt_Modulith.authentication.business.request_response.SignupRequest;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.Account;
 import com.jobhunt.backend.JobHunt_Modulith.authentication.persistence.AccountRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,7 +39,6 @@ public class AccountService {
         repository.save(account);
     }
 
-    @Transactional
     public Account authenticate(LoginRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
