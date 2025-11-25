@@ -1,15 +1,22 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(
+            numToKeepStr: '5',
+            artifactNumToKeepStr: '5'
+        ))
+    }
+
     environment {
         RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
     }
 
     stages {
         stage('Setup') {
-             steps {
-                 sh 'chmod +x mvnw'
-             }
+            steps {
+                sh 'chmod +x mvnw'
+            }
         }
 
         stage('Build') {
