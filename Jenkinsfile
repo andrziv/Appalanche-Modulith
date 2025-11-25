@@ -5,13 +5,13 @@ pipeline {
         RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
     }
 
+    stages {
         stage('Setup') {
              steps {
                  sh 'chmod +x mvnw'
              }
         }
 
-    stages {
         stage('Build') {
             steps {
                 sh './mvnw clean compile'
