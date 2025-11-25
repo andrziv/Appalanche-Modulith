@@ -1,23 +1,11 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     environment {
         RELEASE_TAG = "v0.${env.BUILD_NUMBER}"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-
-                sh 'chmod +x mvnw'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh './mvnw clean compile'
