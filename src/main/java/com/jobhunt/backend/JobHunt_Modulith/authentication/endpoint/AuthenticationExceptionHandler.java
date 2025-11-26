@@ -26,7 +26,7 @@ public class AuthenticationExceptionHandler {
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Login Failed", "message", "Invalid username or password"));
+                .body(Map.of("error", "Login Failed", "message", "Invalid email or password"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
