@@ -26,11 +26,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.jobhunt.backend.JobHunt_Modulith.authentication.endpoint.AccountIntegrationTests.SecurityScenario.*;
+import static com.jobhunt.backend.JobHunt_Modulith.SecurityScenarioHelper.*;
+import static com.jobhunt.backend.JobHunt_Modulith.SecurityScenarioHelper.SecurityScenario.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,9 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 public class AccountIntegrationTests {
-    enum SecurityScenario {
-        VALID_USER, WRONG_USER, EXPIRED_TOKEN, MALFORMED_TOKEN, NO_TOKEN
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -191,7 +188,9 @@ public class AccountIntegrationTests {
         SignupRequest request = new SignupRequest(firstname, lastname, email, password);
 
         var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, new Account("", "", email, password));
+        var headerValue =
+                generateHeaderValueForScenario(
+                        scenario, new Account("", "", email, password), otherUser, secretKey, jwtHelper);
 
         if (headerName != null) {
             return mockMvc.perform(post("/authenticate/signup")
@@ -211,7 +210,9 @@ public class AccountIntegrationTests {
         LoginRequest request = new LoginRequest(email, password);
 
         var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, new Account("", "", email, password));
+        var headerValue =
+                generateHeaderValueForScenario(
+                        scenario, new Account("", "", email, password), otherUser, secretKey, jwtHelper);
 
         if (headerName != null) {
             return mockMvc.perform(post("/authenticate/login")
@@ -223,28 +224,5 @@ public class AccountIntegrationTests {
         return mockMvc.perform(post("/authenticate/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
-    }
-
-    private String generateHeaderNameForScenario(SecurityScenario scenario) {
-        return switch (scenario) {
-            case VALID_USER,
-                 WRONG_USER,
-                 MALFORMED_TOKEN,
-                 EXPIRED_TOKEN -> AUTHORIZATION;
-            case NO_TOKEN -> null;
-        };
-    }
-
-    private String generateHeaderValueForScenario(SecurityScenario scenario, Account owner) {
-        return switch (scenario) {
-            case VALID_USER -> "Bearer " + jwtHelper.generateToken(owner);
-            case WRONG_USER -> "Bearer " + jwtHelper.generateToken(otherUser);
-            case MALFORMED_TOKEN -> "Bearer not.a.valid.token";
-            case EXPIRED_TOKEN -> {
-                var oldHelper = new JwtHelper(secretKey, -1000);
-                yield "Bearer " + oldHelper.generateToken(owner);
-            }
-            case NO_TOKEN -> null;
-        };
     }
 }
