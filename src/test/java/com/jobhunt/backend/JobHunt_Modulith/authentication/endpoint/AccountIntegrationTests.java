@@ -60,7 +60,7 @@ public class AccountIntegrationTests {
 
     private static final Account otherUser = new Account("Other", "User", "not.main@gmail.com", "blarrrgh@123");
 
-    static List<SecurityScenario> scenarios = Arrays.asList(VALID_USER, WRONG_USER, EXPIRED_TOKEN, MALFORMED_TOKEN, NO_TOKEN);
+    static List<SecurityScenario> scenarios = Arrays.asList(VALID_USER, EXPIRED_TOKEN, MALFORMED_TOKEN, MODIFIED_TOKEN, FAKE_TOKEN, NO_TOKEN);
 
     @BeforeEach
     void setUp() {
@@ -190,7 +190,7 @@ public class AccountIntegrationTests {
         var headerName = generateHeaderNameForScenario(scenario);
         var headerValue =
                 generateHeaderValueForScenario(
-                        scenario, new Account("", "", email, password), otherUser, secretKey, jwtHelper);
+                        scenario, new Account("", "", email, password), "other.user@gmail.com", secretKey, jwtHelper);
 
         if (headerName != null) {
             return mockMvc.perform(post("/authenticate/signup")
@@ -212,7 +212,7 @@ public class AccountIntegrationTests {
         var headerName = generateHeaderNameForScenario(scenario);
         var headerValue =
                 generateHeaderValueForScenario(
-                        scenario, new Account("", "", email, password), otherUser, secretKey, jwtHelper);
+                        scenario, new Account("", "", email, password), "other.user@gmail.com", secretKey, jwtHelper);
 
         if (headerName != null) {
             return mockMvc.perform(post("/authenticate/login")
