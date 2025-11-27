@@ -13,10 +13,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.FieldSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -36,8 +39,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 public class AccountIntegrationTests {
+    private final static String USER_FIRST_NAME = "Test";
+    private final static String USER_LAST_NAME = "User";
+    private final static String USER_EMAIL = "test.user@gmail.com";
+    private final static String USER_PASSWORD = "1definitely2Secure";
+    private final static String ATTACKER_EMAIL = "other.user@gmail.com";
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,9 +67,12 @@ public class AccountIntegrationTests {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-    private static final Account otherUser = new Account("Other", "User", "not.main@gmail.com", "blarrrgh@123");
-
     static List<SecurityScenario> scenarios = Arrays.asList(VALID_USER, EXPIRED_TOKEN, MALFORMED_TOKEN, MODIFIED_TOKEN, FAKE_TOKEN, NO_TOKEN);
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+    }
 
     @BeforeEach
     void setUp() {
@@ -70,31 +82,21 @@ public class AccountIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldRegisterNewAccountSuccessfully(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "test.user@gmail.com";
-        var password = "1definitely2Secure";
+        var output = registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
 
-        var output = registerAccount(firstname, lastname, email, password, scenario);
-
-        var account = accountRepository.findByEmail(email);
+        var account = accountRepository.findByEmail(USER_EMAIL);
         output.andExpect(status().isCreated());
         assertThat(account).isPresent();
-        assertThat(account.get().getFirstName()).isEqualTo("Test");
-        assertThat(account.get().getLastName()).isEqualTo("User");
-        assertThat(account.get().getPassword()).isNotEqualTo("1definitely2Secure");
+        assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
+        assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
+        assertThat(account.get().getPassword()).isNotEqualTo(USER_PASSWORD);
     }
 
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldFailRegistrationWithDuplicateEmailInput(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "test.user@gmail.com";
-        var password = "1definitely2Secure";
-
-        registerAccount(firstname, lastname, email, password, scenario);
-        var output = registerAccount(lastname, firstname, email, password, scenario);
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var output = registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(status().isConflict());
@@ -108,16 +110,13 @@ public class AccountIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldFailRegistrationWithInvalidEmailInput(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "testuser";
-        var password = "1definitely2Secure";
+        var invalidEmail = "testuser";
 
-        var output = registerAccount(firstname, lastname, email, password, scenario);
+        var output = registerAccount(invalidEmail, USER_PASSWORD, scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(status().isBadRequest());
-        assertThat(accountRepository.findByEmail(email)).isEmpty();
+        assertThat(accountRepository.findByEmail(invalidEmail)).isEmpty();
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getErrorMessage()).isEqualTo(null);
         assertEquals("{\"email\":\"Invalid email format\"}",
@@ -128,16 +127,13 @@ public class AccountIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldFailRegistrationWithInvalidPasswordInput(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "test.user@gmail.com";
-        var password = "pass1";
+        var invalidPassword = "pass1";
 
-        var output = registerAccount(firstname, lastname, email, password, scenario);
+        var output = registerAccount(USER_EMAIL, invalidPassword, scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(status().isBadRequest());
-        assertThat(accountRepository.findByEmail(email)).isEmpty();
+        assertThat(accountRepository.findByEmail(USER_EMAIL)).isEmpty();
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(response.getErrorMessage()).isEqualTo(null);
         assertEquals("{\"password\":\"Password must be between 8 and 30 characters\"}",
@@ -148,31 +144,21 @@ public class AccountIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldLoginSuccessfullyWithValidInputs(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "test.user@gmail.com";
-        var password = "1definitely2Secure";
-
-        registerAccount(firstname, lastname, email, password, scenario);
-        var output = authenticateAccount(email, password, scenario);
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var output = authenticateAccount(USER_PASSWORD, scenario);
         var response = output.andReturn().getResponse();
 
         String token = JsonPath.read(response.getContentAsString(), "$.token");
         output.andExpect(status().isOk());
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(jwtHelper.extractUsername(token)).isEqualTo(email);
+        assertThat(jwtHelper.extractUsername(token)).isEqualTo(USER_EMAIL);
     }
 
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldRejectLoginWithWrongPassword(SecurityScenario scenario) throws Exception {
-        var firstname = "Test";
-        var lastname = "User";
-        var email = "test.user@gmail.com";
-        var password = "1definitely2Secure";
-
-        registerAccount(firstname, lastname, email, password, scenario);
-        var output = authenticateAccount(email, password + '1', scenario);
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var output = authenticateAccount(USER_PASSWORD + '1', scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(status().isUnauthorized());
@@ -184,45 +170,41 @@ public class AccountIntegrationTests {
     }
 
     @NotNull
-    private ResultActions registerAccount(String firstname, String lastname, String email, String password, SecurityScenario scenario) throws Exception {
-        SignupRequest request = new SignupRequest(firstname, lastname, email, password);
+    private ResultActions registerAccount(String email, String password, SecurityScenario scenario) throws Exception {
+        SignupRequest signupData = new SignupRequest(USER_FIRST_NAME, USER_LAST_NAME, email, password);
 
+        var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, email, password);
         var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue =
-                generateHeaderValueForScenario(
-                        scenario, new Account("", "", email, password), "other.user@gmail.com", secretKey, jwtHelper);
+        var headerValue = generateHeaderValueForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+
+        var request = post("/authenticate/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(signupData));
 
         if (headerName != null) {
-            return mockMvc.perform(post("/authenticate/signup")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(headerName, headerValue)
-                    .content(objectMapper.writeValueAsString(request)));
-
+            request.header(headerName, headerValue);
         }
 
-        return mockMvc.perform(post("/authenticate/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+        return mockMvc.perform(request);
     }
 
     @NotNull
-    private ResultActions authenticateAccount(String email, String password, SecurityScenario scenario) throws Exception {
-        LoginRequest request = new LoginRequest(email, password);
+    private ResultActions authenticateAccount(String password, SecurityScenario scenario) throws Exception {
+        LoginRequest requestData = new LoginRequest(USER_EMAIL, password);
 
+        var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, USER_EMAIL, password);
         var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue =
-                generateHeaderValueForScenario(
-                        scenario, new Account("", "", email, password), "other.user@gmail.com", secretKey, jwtHelper);
+        var headerValue = generateHeaderValueForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+
+
+        var request = post("/authenticate/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestData));
 
         if (headerName != null) {
-            return mockMvc.perform(post("/authenticate/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(headerName, headerValue)
-                    .content(objectMapper.writeValueAsString(request)));
+            request.header(headerName, headerValue);
         }
 
-        return mockMvc.perform(post("/authenticate/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+        return mockMvc.perform(request);
     }
 }
