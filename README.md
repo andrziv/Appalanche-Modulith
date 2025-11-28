@@ -162,6 +162,7 @@ To run this project locally, you will need Java, Maven, and Docker installed.
    - Look into CSRF protection (it's currently disabled and I believe it requires a little extra work to get it going on the frontend, so this will happen after I'm satisfied with the state of the frontend)
    - Currently only JWTs are in-play, but I'd like to add a stored opaque token that allows for JWTs to be automatically provided if the opaque token is present.
      - This will make sessions last longer while also avoiding the downsides of JWTs not being able to be revoked...
+   - OAUTH and SSO to be added too because I think implementation could be interesting
 3) Exposing the Status Data?
     - A little extra work but having the data be "get-able" would allow for less hardcoding on the Frontend part
 4) Porting over to the latest and greatest
