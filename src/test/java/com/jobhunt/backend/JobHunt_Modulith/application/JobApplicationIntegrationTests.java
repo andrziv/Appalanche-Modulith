@@ -125,9 +125,9 @@ class JobApplicationIntegrationTests {
         var output = createApplication(requisitionId, title, company, interest, statusCode, appliedDate, responseDate, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedCreationStatusCodeFor(scenario));
-        assertResponseContentForCreationEndpoint(output, scenario);
+        output.andExpect(resourceCreatedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectCreatedStatusCode(scenario));
+        assertResponseContentForNewlyCreatedResourceURI(output, scenario);
     }
 
     @ParameterizedTest
@@ -147,9 +147,9 @@ class JobApplicationIntegrationTests {
         var output = modifyApplication(applicationId, newRequisitionId, newTitle, newCompany, newInterest, newStatus.getCode(), newAppliedDate, newResponseDate, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedModificationTypeHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedModificationTypeStatusCodeFor(scenario));
-        assertDataForModificationEndpoint(
+        output.andExpect(noContentHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectNoResponseStatusCode(scenario));
+        assertApplicationDataUsingId(
                 applicationId,
                 existingApplication,
                 new JobApplication(
@@ -174,8 +174,8 @@ class JobApplicationIntegrationTests {
         var output = deleteApplication(applicationId, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedModificationTypeHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedModificationTypeStatusCodeFor(scenario));
+        output.andExpect(noContentHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectNoResponseStatusCode(scenario));
         assertMissingApplicationPresence(applicationId, scenario);
     }
 
@@ -195,8 +195,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"requisitionId\":\"Requisition ID cannot be blank\"}", scenario);
     }
@@ -217,8 +217,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"title\":\"Job title cannot be blank\"}", scenario);
     }
@@ -239,8 +239,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"company\":\"Company name cannot be blank\"}", scenario);
     }
@@ -261,8 +261,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"interest\":\"Interest rating must be between 1 and 10, inclusive\"}", scenario);
     }
@@ -283,8 +283,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"interest\":\"Interest rating must be between 1 and 10, inclusive\"}", scenario);
     }
@@ -305,8 +305,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedFailedCreationHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedFailedCreationStatusCodeFor(scenario));
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"statusCode\":\"Status code cannot be blank\"}", scenario);
     }
@@ -327,8 +327,8 @@ class JobApplicationIntegrationTests {
 
         var applicationSize = applicationRepository.findByOwnerEmail(USER_EMAIL_1).size();
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(scenario));
+        output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
         assertThat(applicationSize).isEqualTo(currentApplicationSize);
         assertFailedValidationContent(response, "{\"message\":\"Either 'BLAARGH' is an improper status code, or the code was not found in the database.\"}", scenario);
     }
@@ -346,9 +346,9 @@ class JobApplicationIntegrationTests {
         var output = modifyApplication(applicationId, null, null, null, null, nonexistentStatusCode, null, null, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(scenario));
-        assertDataForModificationEndpoint(
+        output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
+        assertApplicationDataUsingId(
                 applicationId,
                 existingApplication,
                 existingApplication,
@@ -369,8 +369,8 @@ class JobApplicationIntegrationTests {
         var output = modifyApplication(999999, newRequisitionId, newTitle, newCompany, newInterest, newStatus.getCode(), newAppliedDate, newResponseDate, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(scenario));
+        output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
         assertFailedValidationContent(response, "{\"message\":\"Job application not found.\"}", scenario);
     }
 
@@ -383,10 +383,10 @@ class JobApplicationIntegrationTests {
         var output = modifyApplication(otherUserApplicationId, "Hacked!", "Hacked!", "Hacked!", null, null, null, null, VALID_USER);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(VALID_USER));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(VALID_USER));
+        output.andExpect(resourceMissingHttpStatusMatcherFor(VALID_USER));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(VALID_USER));
         assertFailedValidationContent(response, "{\"message\":\"Job application not found.\"}", VALID_USER);
-        assertDataForModificationEndpoint(
+        assertApplicationDataUsingId(
                 otherUserApplicationId,
                 existingApplication,
                 existingApplication,
@@ -401,8 +401,8 @@ class JobApplicationIntegrationTests {
         var output = deleteApplication(nonexistentId, scenario);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(scenario));
+        output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
         assertThat(applicationRepository.findById(nonexistentId)).isEmpty();
     }
 
@@ -415,10 +415,10 @@ class JobApplicationIntegrationTests {
         var output = deleteApplication(otherUserApplicationId, VALID_USER);
 
         var response = output.andReturn().getResponse();
-        output.andExpect(expectedResourceMissingFailHttpStatusMatcherFor(VALID_USER));
-        assertThat(response.getStatus()).isEqualTo(expectedResourceMissingFailStatusCodeFor(VALID_USER));
+        output.andExpect(resourceMissingHttpStatusMatcherFor(VALID_USER));
+        assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(VALID_USER));
         assertFailedValidationContent(response, "{\"message\":\"Job application not found.\"}", VALID_USER);
-        assertDataForModificationEndpoint(
+        assertApplicationDataUsingId(
                 otherUserApplicationId,
                 existingApplication,
                 existingApplication,
@@ -496,7 +496,7 @@ class JobApplicationIntegrationTests {
         return mockMvc.perform(request);
     }
 
-    private static ResultMatcher expectedCreationHttpStatusMatcherFor(SecurityScenario scenario) {
+    private static ResultMatcher resourceCreatedHttpStatusMatcherFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> status().isCreated();
             case MALFORMED_TOKEN,
@@ -507,7 +507,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static ResultMatcher expectedFailedCreationHttpStatusMatcherFor(SecurityScenario scenario) {
+    private static ResultMatcher badRequestHttpStatusMatcherFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> status().isBadRequest();
             case MALFORMED_TOKEN,
@@ -518,7 +518,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static ResultMatcher expectedResourceMissingFailHttpStatusMatcherFor(SecurityScenario scenario) {
+    private static ResultMatcher resourceMissingHttpStatusMatcherFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> status().isNotFound();
             case MALFORMED_TOKEN,
@@ -529,20 +529,9 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static ResultMatcher expectedModificationTypeHttpStatusMatcherFor(SecurityScenario scenario) {
+    private static ResultMatcher noContentHttpStatusMatcherFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> status().isNoContent();
-            case MALFORMED_TOKEN,
-                 EXPIRED_TOKEN,
-                 MODIFIED_TOKEN,
-                 FAKE_TOKEN,
-                 NO_TOKEN -> status().isUnauthorized();
-        };
-    }
-
-    private static ResultMatcher expectedFailedModificationTypeHttpStatusMatcherFor(SecurityScenario scenario) {
-        return switch (scenario) {
-            case VALID_USER -> status().isBadRequest();
             case MALFORMED_TOKEN,
                  EXPIRED_TOKEN,
                  MODIFIED_TOKEN,
@@ -562,7 +551,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static int expectedCreationStatusCodeFor(SecurityScenario scenario) {
+    private static int expectCreatedStatusCode(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> 201;
             case MALFORMED_TOKEN,
@@ -573,7 +562,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static int expectedFailedCreationStatusCodeFor(SecurityScenario scenario) {
+    private static int expectBadRequestStatusCode(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> 400;
             case MALFORMED_TOKEN,
@@ -584,7 +573,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static int expectedResourceMissingFailStatusCodeFor(SecurityScenario scenario) {
+    private static int expectResourceMissingStatusCode(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> 404;
             case MALFORMED_TOKEN,
@@ -595,7 +584,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static int expectedModificationTypeStatusCodeFor(SecurityScenario scenario) {
+    private static int expectNoResponseStatusCode(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> 204;
             case MALFORMED_TOKEN,
@@ -644,7 +633,7 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void assertResponseContentForCreationEndpoint(ResultActions result, SecurityScenario scenario) throws Exception {
+    private void assertResponseContentForNewlyCreatedResourceURI(ResultActions result, SecurityScenario scenario) throws Exception {
         var response = result.andReturn().getResponse();
 
         switch (scenario) {
@@ -666,7 +655,7 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void assertDataForModificationEndpoint(long applicationId, JobApplication old, JobApplication expected, SecurityScenario scenario) {
+    private void assertApplicationDataUsingId(long applicationId, JobApplication old, JobApplication expected, SecurityScenario scenario) {
         var applicationInRepository = applicationRepository.findById(applicationId);
         if (applicationInRepository.isEmpty()) {
             fail("The job application with the ID you submitted does not exist. " +
