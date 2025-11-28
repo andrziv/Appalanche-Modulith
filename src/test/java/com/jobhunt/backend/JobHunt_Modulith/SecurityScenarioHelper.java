@@ -59,6 +59,7 @@ public class SecurityScenarioHelper {
     }
 
     // https://www.baeldung.com/java-rotate-string-by-n-characters
+    @SuppressWarnings("SameParameterValue")
     private static String rotateString(String s, int c, boolean forward) {
         if (c < 0) {
             throw new IllegalArgumentException("Rotation character count cannot be negative!");

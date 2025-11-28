@@ -767,6 +767,7 @@ class JobApplicationIntegrationTests {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static Date dateOffsetBy(int hours) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
