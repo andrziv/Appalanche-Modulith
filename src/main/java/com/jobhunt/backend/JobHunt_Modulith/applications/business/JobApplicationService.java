@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,8 +33,12 @@ public class JobApplicationService {
         return applicationRepository.findByOwnerEmail(getCurrentUserEmail());
     }
 
+    public Optional<JobApplication> getApplication(long id) {
+        return applicationRepository.findByIdAndOwnerEmail(id, getCurrentUserEmail());
+    }
+
     @Transactional
-    public void addApplication(AddApplicationRequest request) {
+    public JobApplication addApplication(AddApplicationRequest request) {
         logger.info("Received {} to AddApplication service method.", request);
 
         var status = statusRepository.findByCode(request.statusCode())
@@ -65,7 +70,7 @@ public class JobApplicationService {
                         appliedDate,
                         responseDate);
 
-        applicationRepository.save(application);
+        return applicationRepository.save(application);
     }
 
     @Transactional
@@ -75,7 +80,7 @@ public class JobApplicationService {
         String currentUser = getCurrentUserEmail();
 
         var application = applicationRepository.findByIdAndOwnerEmail(applicationId, currentUser)
-                                               .orElseThrow(() -> new EntityNotFoundException("Application not found."));
+                                               .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         if (request.statusCode() != null) {
             var newStatus = statusRepository.findByCode(request.statusCode())
@@ -99,7 +104,9 @@ public class JobApplicationService {
             application.setCompany(request.company());
         }
 
-        application.setInterest(request.interest());
+        if (request.interest() != null) {
+            application.setInterest(request.interest());
+        }
 
         if (request.appliedDate() != null) {
             application.setAppliedDate(request.appliedDate());
@@ -121,7 +128,7 @@ public class JobApplicationService {
         String currentUser = getCurrentUserEmail();
 
         JobApplication application = applicationRepository.findByIdAndOwnerEmail(applicationId, currentUser)
-                                                          .orElseThrow(() -> new EntityNotFoundException("Job Application not found."));
+                                                          .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         applicationRepository.delete(application);
     }

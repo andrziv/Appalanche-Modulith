@@ -8,7 +8,7 @@ public record ModifyApplicationRequest(
         String requisitionId,
         String title,
         String company,
-        int interest,
+        Integer interest,
         String statusCode,
         Date appliedDate,
         Date responseDate) {

@@ -1,6 +1,7 @@
 package com.jobhunt.backend.JobHunt_Modulith.applications.business.request_response;
 
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.lang.NonNull;
 
 import java.util.Date;
@@ -15,8 +16,8 @@ public record AddApplicationRequest(
         @NotBlank(message = "Company name cannot be blank")
         String company,
 
-        @NotBlank(message = "Interest rating cannot be blank")
-        int interest,
+        @Range(min = 1, max = 10, message = "Interest rating must be between 1 and 10, inclusive")
+        Integer interest,
 
         @NotBlank(message = "Status code cannot be blank")
         String statusCode,

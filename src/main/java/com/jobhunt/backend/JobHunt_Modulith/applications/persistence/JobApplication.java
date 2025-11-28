@@ -33,7 +33,7 @@ public class JobApplication implements Serializable {
     @JoinColumn(name = "status_id", nullable = false)
     private JobApplicationStatus status;
 
-    @Column(updatable = false, name = "date_applied")
+    @Column(name = "date_applied")
     private Date appliedDate;
 
     @Column(name = "date_response")
