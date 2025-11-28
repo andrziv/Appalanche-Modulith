@@ -32,8 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String messageJson = """
                 {
                   "error": "%s",
-                  "details": "%s",
-                  "status": "401"
+                  "details": "%s"
                 }
                 """.formatted(title, details);
 

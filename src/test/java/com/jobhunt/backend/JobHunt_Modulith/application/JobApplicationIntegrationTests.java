@@ -769,8 +769,7 @@ class JobApplicationIntegrationTests {
                     .isEqualTo("""
                             {
                               "error": "Invalid Token",
-                              "details": "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 3",
-                              "status": "401"
+                              "details": "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 3"
                             }
                             """);
             case EXPIRED_TOKEN -> {
@@ -781,8 +780,7 @@ class JobApplicationIntegrationTests {
                 );
 
                 assertThat(jsonBody)
-                        .containsEntry("error", "Token has expired")
-                        .containsEntry("status", "401");
+                        .containsEntry("error", "Token has expired");
 
                 assertThat((String) jsonBody.get("details"))
                         .startsWith("JWT expired")
@@ -794,16 +792,14 @@ class JobApplicationIntegrationTests {
                     .isEqualTo("""
                             {
                               "error": "Invalid Token",
-                              "details": "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.",
-                              "status": "401"
+                              "details": "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted."
                             }
                             """);
             case NO_TOKEN -> assertThat(response.getContentAsString())
                     .isEqualTo("""
                             {
                               "error": "Unauthorized",
-                              "details": "Authentication required",
-                              "status": "401"
+                              "details": "Authentication required"
                             }
                             """);
             default -> fail("Implement the case for " + scenario + "!");

@@ -102,7 +102,7 @@ public class AccountIntegrationTests {
         output.andExpect(status().isConflict());
         assertThat(response.getStatus()).isEqualTo(409);
         assertThat(response.getErrorMessage()).isEqualTo(null);
-        assertEquals("{\"error\":\"Conflict\",\"message\":\"User with the email address 'test.user@gmail.com' already exists\"}",
+        assertEquals("{\"message\":\"User with the email address 'test.user@gmail.com' already exists\"}",
                 response.getContentAsString(),
                 NON_EXTENSIBLE);
     }
@@ -164,7 +164,7 @@ public class AccountIntegrationTests {
         output.andExpect(status().isUnauthorized());
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(response.getErrorMessage()).isEqualTo(null);
-        assertEquals("{\"error\":\"Login Failed\",\"message\":\"Invalid email or password\"}",
+        assertEquals("{\"message\":\"Invalid email or password\"}",
                 response.getContentAsString(),
                 NON_EXTENSIBLE);
     }
