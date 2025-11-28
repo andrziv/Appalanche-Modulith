@@ -606,17 +606,6 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    private static int expectedFailedModificationTypeStatusCodeFor(SecurityScenario scenario) {
-        return switch (scenario) {
-            case VALID_USER -> 400;
-            case MALFORMED_TOKEN,
-                 EXPIRED_TOKEN,
-                 MODIFIED_TOKEN,
-                 FAKE_TOKEN,
-                 NO_TOKEN -> genericExpectedStatusCodeFor(scenario);
-        };
-    }
-
     private static int genericExpectedStatusCodeFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> 200;
@@ -628,6 +617,7 @@ class JobApplicationIntegrationTests {
         };
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertResponseContentForGetAllEndpoint(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> {
@@ -653,6 +643,7 @@ class JobApplicationIntegrationTests {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertResponseContentForCreationEndpoint(ResultActions result, SecurityScenario scenario) throws Exception {
         var response = result.andReturn().getResponse();
 
@@ -674,6 +665,7 @@ class JobApplicationIntegrationTests {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertDataForModificationEndpoint(long applicationId, JobApplication old, JobApplication expected, SecurityScenario scenario) {
         var applicationInRepository = applicationRepository.findById(applicationId);
         if (applicationInRepository.isEmpty()) {
@@ -712,42 +704,22 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    private void assertApplicationPresence(long applicationId, SecurityScenario scenario) {
-        var applicationInRepository = applicationRepository.findById(applicationId);
-
-        switch (scenario) {
-            case VALID_USER -> {
-                assertThat(applicationInRepository).isNotEmpty();
-            }
-            case MALFORMED_TOKEN,
-                 EXPIRED_TOKEN,
-                 MODIFIED_TOKEN,
-                 FAKE_TOKEN,
-                 NO_TOKEN -> {
-                assertThat(applicationInRepository).isEmpty();
-            }
-            default -> fail("Implement the case for " + scenario + "!");
-        }
-    }
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertMissingApplicationPresence(long applicationId, SecurityScenario scenario) {
         var applicationInRepository = applicationRepository.findById(applicationId);
 
         switch (scenario) {
-            case VALID_USER -> {
-                assertThat(applicationInRepository).isEmpty();
-            }
+            case VALID_USER -> assertThat(applicationInRepository).isEmpty();
             case MALFORMED_TOKEN,
                  EXPIRED_TOKEN,
                  MODIFIED_TOKEN,
                  FAKE_TOKEN,
-                 NO_TOKEN -> {
-                assertThat(applicationInRepository).isNotEmpty();
-            }
+                 NO_TOKEN -> assertThat(applicationInRepository).isNotEmpty();
             default -> fail("Implement the case for " + scenario + "!");
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertFailedValidationContent(
             MockHttpServletResponse response, String expectedContent, SecurityScenario scenario) throws Exception {
         switch (scenario) {
@@ -761,7 +733,7 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertGenericEndpointResponse(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> fail("Implement the correct assertion!");
