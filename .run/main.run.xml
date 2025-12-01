@@ -6,11 +6,11 @@
     <option name="envFilePaths">
       <option value="$PROJECT_DIR$/.env" />
     </option>
-    <option name="MAIN_CLASS_NAME" value="com.jobhunt.backend.JobHunt_Modulith.JobHuntModulithApplication" />
-    <module name="jobhunt-modulith" />
+    <option name="MAIN_CLASS_NAME" value="com.appalanche.backend.AppalancheModulithApplication" />
+    <module name="appalanche-modulith" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.jobhunt.backend.JobHunt_Modulith.*" />
+        <option name="PATTERN" value="com.appalanche.backend.Appalanche_Modulith.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

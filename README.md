@@ -1,5 +1,5 @@
-# JobHunt Modulith Project
-This project serves as the backend of the JobHunt system. This is my first attempt at a "Secure" Spring server, with a 
+# Appalanche Modulith Project
+This project serves as the backend of the Appalanche system. This is my first attempt at a "Secure" Spring server, with a 
 reliance on it being a Modulith because I think that having the modules/components be "microservice-like" and standalone
 is worth doing, not only because it's interesting, but it also keeps your mind sharper (monoliths are pretty easy to 
 build in comparison). It's a pretty simple CRUD server, but it was a nice first "non-tutorial"/copy-paste/cookie cutter 

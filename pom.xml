@@ -8,11 +8,11 @@
         <version>3.5.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.jobhunt.backend</groupId>
-    <artifactId>jobhunt-modulith</artifactId>
+    <groupId>com.appalanche.backend</groupId>
+    <artifactId>appalanche-modulith</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>JobHunt-Modulith</name>
-    <description>Server modulith for the JobHunt system</description>
+    <name>Appalanche-Modulith</name>
+    <description>Server modulith for the Appalanche system</description>
     <url/>
     <licenses>
         <license/>

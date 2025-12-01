@@ -50,7 +50,7 @@ pipeline {
 
                     sh 'git tag -a ${RELEASE_TAG} -m \'Release ${RELEASE_TAG} by Jenkins\''
 
-                    sh 'git push https://x-oauth-basic:${GITHUB_TOKEN}@github.com/andrziv/JobHunt-Modulith.git --tags'
+                    sh 'git push https://x-oauth-basic:${GITHUB_TOKEN}@github.com/andrziv/Appalanche-Modulith.git --tags'
                 }
             }
         }
