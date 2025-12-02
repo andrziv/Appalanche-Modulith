@@ -1,8 +1,8 @@
 package com.appalanche.backend.applications.persistence.pre_generation;
 
 import com.appalanche.backend.applications.config.JobApplicationStatusProperties;
-import com.appalanche.backend.applications.persistence.JobApplicationStatus;
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
+import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

@@ -4,8 +4,12 @@ import com.appalanche.backend.applications.business.JobApplicationService;
 import com.appalanche.backend.applications.business.request_response.AddApplicationRequest;
 import com.appalanche.backend.applications.business.request_response.AddApplicationResponse;
 import com.appalanche.backend.applications.business.request_response.ModifyApplicationRequest;
-import com.appalanche.backend.applications.persistence.JobApplication;
+import com.appalanche.backend.applications.business.request_response.SearchApplicationRequest;
+import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @RequestMapping("/application")
@@ -27,9 +32,9 @@ public class JobApplicationController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<JobApplication>> getJobApplications() {
-        List<JobApplication> applications = jobApplicationService.getApplications();
-        return ResponseEntity.ok(applications);
+    public ResponseEntity<Page<JobApplication>> searchApplications(@ModelAttribute SearchApplicationRequest request,
+                                                                   @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
+        return ResponseEntity.ok(jobApplicationService.searchApplications(request, pageable));
     }
 
     @GetMapping("/{id}")

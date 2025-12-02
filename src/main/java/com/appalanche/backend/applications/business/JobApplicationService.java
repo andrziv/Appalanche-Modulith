@@ -2,18 +2,23 @@ package com.appalanche.backend.applications.business;
 
 import com.appalanche.backend.applications.business.request_response.AddApplicationRequest;
 import com.appalanche.backend.applications.business.request_response.ModifyApplicationRequest;
+import com.appalanche.backend.applications.business.request_response.SearchApplicationRequest;
 import com.appalanche.backend.applications.persistence.ApplicationRepository;
-import com.appalanche.backend.applications.persistence.JobApplication;
+import com.appalanche.backend.applications.persistence.ApplicationSpecificationFactory;
+import com.appalanche.backend.applications.persistence.JobApplicationExperienceRepository;
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
+import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,18 +28,22 @@ public class JobApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final JobApplicationStatusRepository statusRepository;
+    private final JobApplicationExperienceRepository experienceRepository;
 
-    public JobApplicationService(ApplicationRepository applicationRepository, JobApplicationStatusRepository statusRepository) {
+    public JobApplicationService(ApplicationRepository applicationRepository, JobApplicationStatusRepository statusRepository,
+                                 JobApplicationExperienceRepository experienceRepository) {
         this.applicationRepository = applicationRepository;
         this.statusRepository = statusRepository;
-    }
-
-    public List<JobApplication> getApplications() {
-        return applicationRepository.findByOwnerEmail(getCurrentUserEmail());
+        this.experienceRepository = experienceRepository;
     }
 
     public Optional<JobApplication> getApplication(long id) {
         return applicationRepository.findByIdAndOwnerEmail(id, getCurrentUserEmail());
+    }
+
+    public Page<JobApplication> searchApplications(SearchApplicationRequest filter, Pageable pageable) {
+        Specification<JobApplication> spec = ApplicationSpecificationFactory.generateSpecificationList(filter, getCurrentUserEmail());
+        return applicationRepository.findAll(spec, pageable);
     }
 
     @Transactional
@@ -43,9 +52,17 @@ public class JobApplicationService {
 
         var status = statusRepository.findByCode(request.statusCode())
                                      .orElseThrow(() -> {
-                                         var errorString = String.format("Either '%s' is an improper status code, or the code was not found in the database.", request.statusCode());
+                                         var errorString = String.format("Either '%s' is an improper status code, " +
+                                                 "or the code was not found in the database.", request.statusCode());
                                          return new EntityNotFoundException(errorString);
                                      });
+
+        var experience = experienceRepository.findByCode(request.experienceLevelCode())
+                                             .orElseThrow(() -> {
+                                                 var errorString = String.format("Either '%s' is an improper experience level code, " +
+                                                         "or the code was not found in the database.", request.experienceLevelCode());
+                                                 return new EntityNotFoundException(errorString);
+                                             });
 
         var appliedDate = request.appliedDate();
         if (appliedDate == null) {
@@ -67,6 +84,7 @@ public class JobApplicationService {
                         request.company(),
                         request.interest(),
                         status,
+                        experience,
                         appliedDate,
                         responseDate);
 
@@ -90,6 +108,17 @@ public class JobApplicationService {
                                             });
 
             application.setStatus(newStatus);
+        }
+
+        if (request.experienceLevelCode() != null) {
+            var newExperienceLevel = experienceRepository.findByCode(request.experienceLevelCode())
+                                                         .orElseThrow(() -> {
+                                                             var errorString = String.format("Either '%s' is an improper experience level code, " +
+                                                                     "or the code was not found in the database.", request.experienceLevelCode());
+                                                             return new EntityNotFoundException(errorString);
+                                                         });
+
+            application.setExperience(newExperienceLevel);
         }
 
         if (request.requisitionId() != null) {

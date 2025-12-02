@@ -1,0 +1,34 @@
+appalanche:
+  experience:
+    levels:
+      - code: "INTERN"
+        label: "Intern"
+        description: "Not graduated yet"
+
+      - code: "ENTRY_LEVEL"
+        label: "Entry Level"
+        description: "0 years experience"
+
+      - code: "JUNIOR"
+        label: "Junior"
+        description: "1–2 years experience"
+
+      - code: "INTERMEDIATE"
+        label: "Intermediate"
+        description: "3–5 years experience"
+
+      - code: "SENIOR"
+        label: "Senior"
+        description: "5–8 years experience"
+
+      - code: "STAFF"
+        label: "Staff"
+        description: ">8 years experience"
+
+      - code: "PRINCIPAL"
+        label: "Principal"
+        description: ">10 years experience"
+
+      - code: "MANAGER"
+        label: "Manager"
+        description: "Managerial role"

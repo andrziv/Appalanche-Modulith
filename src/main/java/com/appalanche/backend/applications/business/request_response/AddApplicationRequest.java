@@ -2,6 +2,7 @@ package com.appalanche.backend.applications.business.request_response;
 
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.NonNull;
 
 import java.util.Date;
@@ -22,15 +23,20 @@ public record AddApplicationRequest(
         @NotBlank(message = "Status code cannot be blank")
         String statusCode,
 
+        @NotBlank(message = "Experience level code cannot be blank")
+        String experienceLevelCode,
+
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         Date appliedDate,
 
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         Date responseDate) {
 
     @NonNull
     @Override
     public String toString() {
         return String.format("AddApplicationRequest[requisitionId='%s', title='%s', company='%s', " +
-                        "interest='%d', statusCode='%s', appliedDate='%s', responseDate='%s']",
-                requisitionId, title, company, interest, statusCode, appliedDate, responseDate);
+                        "interest='%d', statusCode='%s', experienceLevelCode='%s', appliedDate='%s', responseDate='%s']",
+                requisitionId, title, company, interest, statusCode, experienceLevelCode, appliedDate, responseDate);
     }
 }

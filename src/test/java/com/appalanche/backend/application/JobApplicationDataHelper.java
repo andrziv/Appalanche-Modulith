@@ -1,7 +1,8 @@
 package com.appalanche.backend.application;
 
-import com.appalanche.backend.applications.persistence.JobApplication;
-import com.appalanche.backend.applications.persistence.JobApplicationStatus;
+import com.appalanche.backend.applications.persistence.dao.JobApplication;
+import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
+import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import com.appalanche.backend.authentication.persistence.Account;
 
 import java.util.Date;
@@ -26,22 +27,34 @@ public class JobApplicationDataHelper {
     }
 
     static JobApplicationStatus status1() {
-        return new JobApplicationStatus("CODE_1_1", "Code One", 1, "aaaaaa", "aaaaaa");
+        return new JobApplicationStatus("STATUS_1_1", "Code One", 1, "aaaaaa", "aaaaaa");
     }
 
     static JobApplicationStatus status2() {
-        return new JobApplicationStatus("CODE_2_1", "Code Two", 1, "bbbbbb", "bbbbbb");
+        return new JobApplicationStatus("STATUS_2_1", "Code Two", 1, "bbbbbb", "bbbbbb");
     }
 
     static JobApplicationStatus status3() {
-        return new JobApplicationStatus("CODE_2_2", "Code Two", 2, "cccccc", "cccccc");
+        return new JobApplicationStatus("STATUS_2_2", "Code Two", 2, "cccccc", "cccccc");
     }
 
     static JobApplicationStatus status4() {
-        return new JobApplicationStatus("CODE_3_1", "Code Three", 1, "dddddd", "dddddd");
+        return new JobApplicationStatus("STATUS_3_1", "Code Three", 1, "dddddd", "dddddd");
     }
 
-    static JobApplication firstUserApplication1(JobApplicationStatus status) {
+    static JobApplicationExperience experience1() {
+        return new JobApplicationExperience("EXP_1", "Experience One", "Description one");
+    }
+
+    static JobApplicationExperience experience2() {
+        return new JobApplicationExperience("EXP_2", "Experience Two", "Description two");
+    }
+
+    static JobApplicationExperience experience3() {
+        return new JobApplicationExperience("EXP_3", "Experience Three", "Description three");
+    }
+
+    static JobApplication firstUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-001",
                 USER_EMAIL_1,
@@ -49,10 +62,11 @@ public class JobApplicationDataHelper {
                 "Company 1",
                 8,
                 status,
+                experience,
                 new Date(), new Date());
     }
 
-    static JobApplication firstUserApplication2(JobApplicationStatus status) {
+    static JobApplication firstUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-002",
                 USER_EMAIL_1,
@@ -60,10 +74,11 @@ public class JobApplicationDataHelper {
                 "Company 2",
                 6,
                 status,
+                experience,
                 new Date(), new Date());
     }
 
-    static JobApplication firstUserApplication3(JobApplicationStatus status) {
+    static JobApplication firstUserApplication3(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-003",
                 USER_EMAIL_1,
@@ -71,10 +86,11 @@ public class JobApplicationDataHelper {
                 "Company 1",
                 5,
                 status,
+                experience,
                 new Date(), new Date());
     }
 
-    static JobApplication secondUserApplication1(JobApplicationStatus status) {
+    static JobApplication secondUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-004",
                 USER_EMAIL_2,
@@ -82,10 +98,11 @@ public class JobApplicationDataHelper {
                 "Company 3",
                 9,
                 status,
+                experience,
                 new Date(), new Date());
     }
 
-    static JobApplication secondUserApplication2(JobApplicationStatus status) {
+    static JobApplication secondUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-005",
                 USER_EMAIL_2,
@@ -93,6 +110,7 @@ public class JobApplicationDataHelper {
                 "Company 3",
                 4,
                 status,
+                experience,
                 new Date(), new Date());
     }
 }

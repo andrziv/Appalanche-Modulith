@@ -1,4 +1,4 @@
-package com.appalanche.backend.applications.persistence;
+package com.appalanche.backend.applications.persistence.dao;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +33,10 @@ public class JobApplication implements Serializable {
     @JoinColumn(name = "status_id", nullable = false)
     private JobApplicationStatus status;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "experience_id", nullable = false)
+    private JobApplicationExperience experience;
+
     @Column(name = "date_applied")
     private Date appliedDate;
 
@@ -47,7 +51,8 @@ public class JobApplication implements Serializable {
     }
 
     public JobApplication(String requisitionId, String ownerEmail, String title, String company, Integer interest,
-                          JobApplicationStatus status, Date appliedDate, Date responseDate) {
+                          JobApplicationStatus status, JobApplicationExperience experience,
+                          Date appliedDate, Date responseDate) {
         this.requisitionId = requisitionId;
         this.ownerEmail = ownerEmail;
         this.title = title;
@@ -56,13 +61,14 @@ public class JobApplication implements Serializable {
         this.status = status;
         this.appliedDate = appliedDate;
         this.responseDate = responseDate;
+        this.experience = experience;
     }
 
     @Override
     public String toString() {
         return String.format("JobApplication[id=%d, requisitionId='%s', ownerEmail='%s', title='%s', " +
-                        "company='%s', interest='%d', status='%s']",
-                id, requisitionId, ownerEmail, title, company, interest, status.getLabel());
+                        "company='%s', interest='%d', status='%s', experience='%s']",
+                id, requisitionId, ownerEmail, title, company, interest, status.getLabel(), experience.getLabel());
     }
 
     public Long getId() {
@@ -115,6 +121,14 @@ public class JobApplication implements Serializable {
 
     public void setStatus(JobApplicationStatus status) {
         this.status = status;
+    }
+
+    public JobApplicationExperience getExperience() {
+        return experience;
+    }
+
+    public void setExperience(JobApplicationExperience experience) {
+        this.experience = experience;
     }
 
     public Date getAppliedDate() {

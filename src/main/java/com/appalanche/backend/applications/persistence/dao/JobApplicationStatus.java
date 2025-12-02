@@ -1,4 +1,4 @@
-package com.appalanche.backend.applications.persistence;
+package com.appalanche.backend.applications.persistence.dao;
 
 import jakarta.persistence.*;
 
@@ -12,7 +12,7 @@ public class JobApplicationStatus implements Serializable {
     @Column(nullable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String code;
 
     @Column(nullable = false)
