@@ -26,6 +26,10 @@ public class JobApplicationDataHelper {
         return new Account(USER_FIRST_NAME_2, USER_LAST_NAME_2, USER_EMAIL_2, USER_PASSWORD_2);
     }
 
+    static JobApplicationStatus oldStatus() {
+        return new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000");
+    }
+
     static JobApplicationStatus status1() {
         return new JobApplicationStatus("STATUS_1_1", "Code One", 1, "aaaaaa", "aaaaaa");
     }
@@ -40,6 +44,11 @@ public class JobApplicationDataHelper {
 
     static JobApplicationStatus status4() {
         return new JobApplicationStatus("STATUS_3_1", "Code Three", 1, "dddddd", "dddddd");
+    }
+
+
+    static JobApplicationExperience oldExperience() {
+        return new JobApplicationExperience("old_exp_1", "old experience", "old description");
     }
 
     static JobApplicationExperience experience1() {
@@ -112,5 +121,99 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 new Date(), new Date());
+    }
+
+    static JobApplicationBuilder validUserOneOwnedUniqueApplication(JobApplicationStatus status, JobApplicationExperience experience) {
+        return new JobApplicationBuilder().withRequisitionId("R-500")
+                                          .withOwnerEmail(USER_EMAIL_1)
+                                          .withTitle("Unique Job Title")
+                                          .withCompany("Unique Company")
+                                          .withInterest(10)
+                                          .withStatus(status)
+                                          .withExperience(experience);
+    }
+
+    static JobApplicationBuilder userOneOwnedHelper(JobApplicationStatus status, JobApplicationExperience experience,
+                                                    String title, Integer interest, Date responseDate) {
+        return validUserOneOwnedUniqueApplication(status, experience).withTitle(title)
+                                                                     .withInterest(interest)
+                                                                     .withResponseDate(responseDate);
+    }
+
+    static class JobApplicationBuilder {
+        private String requisitionId;
+        private String ownerEmail;
+        private String title;
+        private String company;
+        private Integer interest;
+        private JobApplicationStatus status;
+        private JobApplicationExperience experience;
+        private Date appliedDate;
+        private Date responseDate;
+
+        JobApplicationBuilder() {
+        }
+
+        JobApplicationBuilder(JobApplication application) {
+            this.requisitionId = application.getRequisitionId();
+            this.ownerEmail = application.getOwnerEmail();
+            this.title = application.getTitle();
+            this.company = application.getCompany();
+            this.interest = application.getInterest();
+            this.status = application.getStatus();
+            this.experience = application.getExperience();
+            this.appliedDate = application.getAppliedDate();
+            this.responseDate = application.getResponseDate();
+        }
+
+        JobApplicationBuilder withRequisitionId(String requisitionId) {
+            this.requisitionId = requisitionId;
+            return this;
+        }
+
+        JobApplicationBuilder withOwnerEmail(String email) {
+            this.ownerEmail = email;
+            return this;
+        }
+
+        JobApplicationBuilder withTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        JobApplicationBuilder withCompany(String company) {
+            this.company = company;
+            return this;
+        }
+
+        JobApplicationBuilder withInterest(Integer interest) {
+            this.interest = interest;
+            return this;
+        }
+
+        JobApplicationBuilder withStatus(JobApplicationStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        JobApplicationBuilder withExperience(JobApplicationExperience experience) {
+            this.experience = experience;
+            return this;
+        }
+
+        JobApplicationBuilder withApplicationDate(Date applicationDate) {
+            this.appliedDate = applicationDate;
+            return this;
+        }
+
+        JobApplicationBuilder withResponseDate(Date responseDate) {
+            this.responseDate = responseDate;
+            return this;
+        }
+
+        JobApplication build() {
+            return new JobApplication(requisitionId, ownerEmail, title, company, interest, status, experience,
+                    appliedDate, responseDate);
+        }
     }
 }

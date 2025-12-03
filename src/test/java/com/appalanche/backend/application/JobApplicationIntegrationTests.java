@@ -37,11 +37,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.appalanche.backend.SecurityScenarioHelper.*;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
 import static com.appalanche.backend.application.JobApplicationDataHelper.*;
+import static java.lang.String.join;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.springframework.http.HttpHeaders.LOCATION;
@@ -88,9 +90,7 @@ class JobApplicationIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        applicationRepository.deleteAll();
-        statusRepository.deleteAll();
-        experienceRepository.deleteAll();
+        clearAllRepositories();
 
         JobApplicationStatus status1 = status1();
         JobApplicationStatus status2 = status2();
@@ -113,6 +113,12 @@ class JobApplicationIntegrationTests {
                         secondUserApplication2(status1, experience1)));
     }
 
+    private void clearAllRepositories() {
+        applicationRepository.deleteAll();
+        statusRepository.deleteAll();
+        experienceRepository.deleteAll();
+    }
+
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldGetAllOwnedJobApplications(SecurityScenario scenario) throws Exception {
@@ -121,7 +127,189 @@ class JobApplicationIntegrationTests {
         var response = output.andReturn().getResponse();
         output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
-        assertResponseContentForGetAllEndpoint(response, scenario);
+        assertListOfReturnedApplications(
+                response,
+                List.of(firstUserApplication1(status1(), experience1()),
+                        firstUserApplication2(status2(), experience1()),
+                        firstUserApplication3(status3(), experience2())),
+                scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllReqIdOrCompanyOrTitleMatchesOnTextSearch(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(status, experience).withTitle("Principal Network Engineer").build());
+        var candidate2 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(status, experience).withRequisitionId("NET-001").build());
+        var candidate3 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(status, experience).withCompany("Netflix").build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withTitle("NOPE")
+                                                                                         .withRequisitionId("NOPE")
+                                                                                         .withCompany("NOPE")
+                                                                                         .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+                                                                                         .withTitle("Principal Network Engineer")
+                                                                                         .withRequisitionId("NET-001")
+                                                                                         .withCompany("Netflix")
+                                                                                         .build());
+
+        var output = getAllApplications("search=net", scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2, candidate3), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredStatusCode(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var statusCandidate1 = statusRepository.save(status1());
+        var statusCandidate2 = statusRepository.save(status2());
+        var statusNonCandidate = statusRepository.save(status3());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(statusCandidate1, experience).build());
+        var candidate2 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(statusCandidate2, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).withOwnerEmail(USER_EMAIL_2)
+                                                                                                   .build());
+
+        var desiredStatusCodes = statusCandidate1.getCode() + "," + statusCandidate2.getCode();
+        var output = getAllApplications("statusCodes=" + desiredStatusCodes, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredExperienceCode(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var status = statusRepository.save(status1());
+        var experienceCandidate1 = experienceRepository.save(experience1());
+        var experienceCandidate2 = experienceRepository.save(experience2());
+        var experienceNonCandidate = experienceRepository.save(experience3());
+        var candidate1 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(status, experienceCandidate1).build());
+        var candidate2 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(status, experienceCandidate2).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experienceNonCandidate).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experienceCandidate1).withOwnerEmail(USER_EMAIL_2)
+                                                                                                   .build());
+
+        var desiredExperienceCodes = experienceCandidate1.getCode() + "," + experienceCandidate2.getCode();
+        var output = getAllApplications("experienceLevelCodes=" + desiredExperienceCodes, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredInterest(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(1)
+                                                                                                          .build());
+        var candidate2 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(5)
+                                                                                                          .build());
+        var candidate3 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(6)
+                                                                                                          .build());
+        var candidate4 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(7)
+                                                                                                          .build());
+        var candidate5 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(9)
+                                                                                                          .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(2).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(3).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(4).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(8).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+                                                                                         .withInterest(6).build());
+
+        var interestPredicates = "gte:9,lt:2,between:5:7";
+        var output = getAllApplications("interestCriteria=" + interestPredicates, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2, candidate3, candidate4, candidate5), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredApplicationDate(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var candidateDate1 = dateOffsetBy(1);
+        var candidateDate2 = dateOffsetBy(25);
+        var nonCandidateDate = dateOffsetBy(-48);
+        var formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(candidateDate1);
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1)
+                                                                                                          .build());
+        var candidate2 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate2)
+                                                                                                          .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(nonCandidateDate)
+                                                                                         .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+                                                                                         .withApplicationDate(candidateDate1)
+                                                                                         .build());
+
+        var output = getAllApplications("appliedAfter=" + formattedDate, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldGetAllApplicationsMatchingCompositeSearchCriteria(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var titleCandidate = "Principal Network Engineer";
+        var titleNonCandidate = "Blah Blah Blah";
+        var statusCandidate = statusRepository.save(status1());
+        var statusNonCandidate = statusRepository.save(status2());
+        var experienceCandidate = experienceRepository.save(experience1());
+        var experienceNonCandidate = experienceRepository.save(experience2());
+        var interestCandidate = 10;
+        var interestNonCandidate = 1;
+        var candidateDate = dateOffsetBy(1);
+        var nonCandidateDate = dateOffsetBy(-48);
+        var candidate = applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, candidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusNonCandidate, experienceCandidate, titleCandidate, interestCandidate, candidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceNonCandidate, titleCandidate, interestCandidate, candidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleNonCandidate, interestCandidate, candidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestNonCandidate, candidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, nonCandidateDate).build());
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, candidateDate).withOwnerEmail(USER_EMAIL_2)
+                                                                                                                                             .build());
+
+        var searchPath = "search=net";
+        var statusPath = "statusCodes=" + statusCandidate.getCode();
+        var experiencePath = "experienceLevelCodes=" + experienceCandidate.getCode();
+        var interestPredicates = "interestCriteria=eq:" + interestCandidate;
+        var responseDatePath = "responseAfter=" + new SimpleDateFormat("yyyy-MM-dd").format(candidateDate);
+        var fullPath = join("&", searchPath, statusPath, experiencePath, interestPredicates, responseDatePath);
+        var output = getAllApplications(fullPath, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate), scenario);
     }
 
     @ParameterizedTest
@@ -518,10 +706,16 @@ class JobApplicationIntegrationTests {
 
     @NotNull
     private ResultActions getAllApplications(SecurityScenario scenario) throws Exception {
+        return getAllApplications("", scenario);
+    }
+
+    @NotNull
+    private ResultActions getAllApplications(String searchPath, SecurityScenario scenario) throws Exception {
         var headerName = generateHeaderNameForScenario(scenario);
         var headerValue = generateHeaderValueForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
 
-        var request = get("/application").contentType(MediaType.APPLICATION_JSON);
+        var path = searchPath.isBlank() ? "" : "?" + searchPath;
+        var request = get("/application" + path).contentType(MediaType.APPLICATION_JSON);
 
         if (headerName != null) {
             request.header(headerName, headerValue);
@@ -714,7 +908,7 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void assertResponseContentForGetAllEndpoint(MockHttpServletResponse response, SecurityScenario scenario) throws IOException {
+    private void assertListOfReturnedApplications(MockHttpServletResponse response, List<JobApplication> expectedApplications, SecurityScenario scenario) throws IOException {
         switch (scenario) {
             case VALID_USER -> {
                 var rootNode = objectMapper.readTree(response.getContentAsString());
@@ -732,7 +926,7 @@ class JobApplicationIntegrationTests {
                                         experience1.getCode().equals(experience2.getCode()),
                                 JobApplicationExperience.class)
                         .ignoringCollectionOrder()
-                        .isEqualTo(List.of(firstUserApplication1(status1(), experience1()), firstUserApplication2(status2(), experience1()), firstUserApplication3(status3(), experience2())));
+                        .isEqualTo(expectedApplications);
             }
             case MALFORMED_TOKEN,
                  EXPIRED_TOKEN,
