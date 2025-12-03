@@ -16,15 +16,38 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - password (`String`)
     - Returns:
       - `201: CREATED`, no body content
+
   - `POST /authenticate/login`, which requires the following fields:
     - Requires the following fields:
       - email (`String`)
       - password (`String`)
     - Returns:
         - `200: OK`, Returns the JWT needed for other endpoint access, and the lifespan of the token in milliseconds
+
 ### Application Endpoints 
+- Note that any date-related input fields are to be formatted in `yyyy-MM-dd` format, unless otherwise specified.
+- Note that any Status or Experience Level related `String` inputs require the strings to be exactly one of the 
+listed Code entries in the [Status Codes](#status-codes) or [Experience Codes](#experience-codes) sections below, respectively.
+
 - **You require a valid Bearer JWT in `Authorization` header to access:**
-  - `GET /application`
+  - `GET /application`, paged
+    - Optional path search params:
+      - search (`String`)
+      - statusCodes (List of `String`)
+      - experienceLevelCodes (List of `String`)
+      - interestCriteria (List of `String`)
+        - Format should be as following: `KEYWORD:NUMBER` or `KEYWORD:NUMBER1:NUMBER2`, see the following:
+          - `gt:NUMBER`, find Applications with interest greater than `NUMBER`
+          - `gte:NUMBER`, find Applications with interest greater or equal to `NUMBER`
+          - `lt:NUMBER`, find Applications with interest less than `NUMBER`
+          - `lte:NUMBER`, find Applications with interest less than or equal to `NUMBER`
+          - `eq:NUMBER`, find Applications with interest equal to `NUMBER`
+          - `between:NUMBER1:NUMBER2`, find Applications with interest between `NUMBER1` and `NUMBER2`, inclusive
+      - appliedAfter (`Date`)
+      - appliedBefore (`Date`)
+      - responseAfter (`Date`)
+      - responseBefore (`Date`)
+
   - `GET /application/{id}`
       - Requires the following path field:
           - ID (`long`)
@@ -43,9 +66,15 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
               - round (`integer`)
               - colour (`String`, HEX code for a colour)
               - textColour (`String`, HEX code for a colour)
+            - experience (`Experience` object)
+              - id (`long`)
+              - code (`String`)
+              - label (`String`)
+              - description (`String`)
             - appliedDate (`Date`)
             - responseDate (`Date`)
             - createdAt (`Date`)
+
   - `POST /application`
       - Requires the following fields:
         - requisitionId (`String`)
@@ -53,7 +82,8 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - title (`String`)
         - company (`String`)
         - interest (`integer`)
-        - status (`String`, only allowing the codes seen in the [Status Codes](#status-codes) section below)
+        - statusCode (`String`)
+        - experienceLevelCode (`String`)
         - appliedDate (`Date`)
         - responseDate (`Date`)
       - Returns:
@@ -61,29 +91,41 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - a return of the newly created application ID in the body:
                 - id (`long`)
             - the URI in the `Location` header
+
   - `PATCH /application/{id}`
-      - Requires the following path field:
-          - ID (`long`)
+    - Requires the following path field:
+      - ID (`long`)
     - Returns:
-        - `204: NO CONTENT`
+      - `204: NO CONTENT`
+
   - `DELETE /application/{id}`
-      - Requires the following path field:
-          - ID (`long`)
+    - Requires the following path field:
+      - ID (`long`)
     - Returns:
-        - `204: NO CONTENT`
+      - `204: NO CONTENT`
       
 ### Status Codes
-  - `APPLIED`
-  - `ONLINE_ASSESSMENT`
-  - `PHONE_INTERVIEW_{0}`
+- `APPLIED`
+- `ONLINE_ASSESSMENT`
+- `PHONE_INTERVIEW_{0}`
+  - Note: {0} can be any integer between 1 and 10, inclusive
+- `INTERVIEW_{0}`
     - Note: {0} can be any integer between 1 and 10, inclusive
-  - `INTERVIEW_{0}`
-      - Note: {0} can be any integer between 1 and 10, inclusive
-  - `TECHNICAL_INTERVIEW_{0}`
-      - Note: {0} can be any integer between 1 and 10, inclusive
-  - `OFFER_RECEIVED`
-  - `REJECTED`
-  - `WITHDREW`
+- `TECHNICAL_INTERVIEW_{0}`
+    - Note: {0} can be any integer between 1 and 10, inclusive
+- `OFFER_RECEIVED`
+- `REJECTED`
+- `WITHDREW`
+
+### Experience Codes
+- `INTERN`
+- `ENTRY_LEVEL`
+- `JUNIOR`
+- `INTERMEDIATE`
+- `SENIOR`
+- `STAFF`
+- `PRINCIPAL`
+- `MANAGER`
 
 ## Local Development Setup
 To run this project locally, you will need Java, Maven, and Docker installed.
@@ -163,7 +205,7 @@ To run this project locally, you will need Java, Maven, and Docker installed.
    - Currently only JWTs are in-play, but I'd like to add a stored opaque token that allows for JWTs to be automatically provided if the opaque token is present.
      - This will make sessions last longer while also avoiding the downsides of JWTs not being able to be revoked...
    - OAUTH and SSO to be added too because I think implementation could be interesting
-3) Exposing the Status Data?
+3) Exposing the Status & Experience Data?
     - A little extra work but having the data be "get-able" would allow for less hardcoding on the Frontend part
 4) Porting over to the latest and greatest
    - The new Spring framework versions have just recently come out and I think I'll wait for a few minor versions to go by before dipping myself into using them.
