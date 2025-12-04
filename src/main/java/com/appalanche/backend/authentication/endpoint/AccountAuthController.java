@@ -6,13 +6,17 @@ import com.appalanche.backend.authentication.business.request_response.LoginResp
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
 import com.appalanche.backend.authentication.persistence.Account;
 import com.appalanche.backend.security.helper.JwtHelper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RequestMapping("/authenticate")
 @RestController
@@ -32,11 +36,21 @@ public class AccountAuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         Account authenticatedAccount = accountService.authenticate(request);
         String jwtToken = jwtDelegate.generateToken(authenticatedAccount);
 
-        LoginResponse response = new LoginResponse(jwtToken, jwtDelegate.getExpirationTime());
-        return ResponseEntity.ok(response);
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", jwtToken)
+                                                 .httpOnly(true)
+                                                 .secure(false) // TODO: add some sort of nuance to this flag so it's properly required in non-dev enviros
+                                                 .path("/")
+                                                 .maxAge(jwtDelegate.getExpirationTime() / 1000)
+                                                 .sameSite("Strict")
+                                                 .build();
+
+        response.addHeader(SET_COOKIE, jwtCookie.toString());
+
+        var responseContent = new LoginResponse(authenticatedAccount.getEmail(), authenticatedAccount.getFirstName() + " " + authenticatedAccount.getLastName());
+        return ResponseEntity.ok(responseContent);
     }
 }

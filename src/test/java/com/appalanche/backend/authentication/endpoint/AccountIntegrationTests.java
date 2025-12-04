@@ -1,12 +1,11 @@
 package com.appalanche.backend.authentication.endpoint;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.appalanche.backend.authentication.business.request_response.LoginRequest;
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
 import com.appalanche.backend.authentication.persistence.Account;
 import com.appalanche.backend.authentication.persistence.AccountRepository;
 import com.appalanche.backend.security.helper.JwtHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,9 +28,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.appalanche.backend.SecurityScenarioHelper.*;
+import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
+import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -148,10 +149,11 @@ public class AccountIntegrationTests {
         var output = authenticateAccount(USER_PASSWORD, scenario);
         var response = output.andReturn().getResponse();
 
-        String token = JsonPath.read(response.getContentAsString(), "$.token");
+        var jwtCookie = response.getCookie("accessToken");
         output.andExpect(status().isOk());
+        assertNotNull(jwtCookie);
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(jwtHelper.extractUsername(token)).isEqualTo(USER_EMAIL);
+        assertThat(jwtHelper.extractUsername(jwtCookie.getValue())).isEqualTo(USER_EMAIL);
     }
 
     @ParameterizedTest
@@ -174,15 +176,14 @@ public class AccountIntegrationTests {
         SignupRequest signupData = new SignupRequest(USER_FIRST_NAME, USER_LAST_NAME, email, password);
 
         var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, email, password);
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = post("/authenticate/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(signupData));
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);
@@ -193,16 +194,14 @@ public class AccountIntegrationTests {
         LoginRequest requestData = new LoginRequest(USER_EMAIL, password);
 
         var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, USER_EMAIL, password);
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
-
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = post("/authenticate/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestData));
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);

@@ -22,14 +22,17 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
       - email (`String`)
       - password (`String`)
     - Returns:
-        - `200: OK`, Returns the JWT needed for other endpoint access, and the lifespan of the token in milliseconds
+        - `200: OK`, Returns the JWT needed for other endpoint access as a Strict httpOnly cookie called "accessToken". 
+          - Also returns content with the following info:
+            - email (`String`)
+            - fullName (`String`)
 
 ### Application Endpoints 
 - Note that any date-related input fields are to be formatted in `yyyy-MM-dd` format, unless otherwise specified.
 - Note that any Status or Experience Level related `String` inputs require the strings to be exactly one of the 
 listed Code entries in the [Status Codes](#status-codes) or [Experience Codes](#experience-codes) sections below, respectively.
 
-- **You require a valid Bearer JWT in `Authorization` header to access:**
+- **You require a valid `accessToken` JWT cookie to access:**
   - `GET /application`, paged
     - Optional path search params:
       - search (`String`)
@@ -201,7 +204,6 @@ To run this project locally, you will need Java, Maven, and Docker installed.
      - Crawling the web to look for available jobs and recommend certain ones to users
      - Crawling a provided link to automatically fill other fields in
 2) Security
-   - Look into CSRF protection (it's currently disabled and I believe it requires a little extra work to get it going on the frontend, so this will happen after I'm satisfied with the state of the frontend)
    - Currently only JWTs are in-play, but I'd like to add a stored opaque token that allows for JWTs to be automatically provided if the opaque token is present.
      - This will make sessions last longer while also avoiding the downsides of JWTs not being able to be revoked...
    - OAUTH and SSO to be added too because I think implementation could be interesting

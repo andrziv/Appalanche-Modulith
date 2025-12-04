@@ -40,8 +40,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.appalanche.backend.SecurityScenarioHelper.*;
+import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
+import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
 import static com.appalanche.backend.application.JobApplicationDataHelper.*;
 import static java.lang.String.join;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -711,14 +712,13 @@ class JobApplicationIntegrationTests {
 
     @NotNull
     private ResultActions getAllApplications(String searchPath, SecurityScenario scenario) throws Exception {
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
+        var cookie = generateCookieForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
 
         var path = searchPath.isBlank() ? "" : "?" + searchPath;
         var request = get("/application" + path).contentType(MediaType.APPLICATION_JSON);
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);
@@ -739,15 +739,14 @@ class JobApplicationIntegrationTests {
                         appliedDate,
                         responseDate);
 
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
+        var cookie = generateCookieForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
 
         var request = post("/application")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestData));
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);
@@ -768,15 +767,14 @@ class JobApplicationIntegrationTests {
                         appliedDate,
                         responseDate);
 
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
+        var cookie = generateCookieForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
 
         var request = patch("/application/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestData));
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);
@@ -784,14 +782,13 @@ class JobApplicationIntegrationTests {
 
     @NotNull
     private ResultActions deleteApplication(long id, SecurityScenario scenario) throws Exception {
-        var headerName = generateHeaderNameForScenario(scenario);
-        var headerValue = generateHeaderValueForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
+        var cookie = generateCookieForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
 
         var request = delete("/application/" + id)
                 .contentType(MediaType.APPLICATION_JSON);
 
-        if (headerName != null) {
-            request.header(headerName, headerValue);
+        if (cookie != null) {
+            request.cookie(cookie);
         }
 
         return mockMvc.perform(request);
