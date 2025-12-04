@@ -11,10 +11,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -50,6 +50,20 @@ public class AccountAuthController {
 
         response.addHeader(SET_COOKIE, jwtCookie.toString());
 
+        var responseContent = new LoginResponse(authenticatedAccount.getEmail(), authenticatedAccount.getFirstName() + " " + authenticatedAccount.getLastName());
+        return ResponseEntity.ok(responseContent);
+    }
+
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<LoginResponse> authenticate() {
+        Optional<Account> tokenAccount = accountService.getCurrentUser();
+
+        if (tokenAccount.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var authenticatedAccount = tokenAccount.get();
         var responseContent = new LoginResponse(authenticatedAccount.getEmail(), authenticatedAccount.getFirstName() + " " + authenticatedAccount.getLastName());
         return ResponseEntity.ok(responseContent);
     }
