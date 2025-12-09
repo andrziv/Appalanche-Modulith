@@ -1,0 +1,101 @@
+package com.appalanche.backend.profiles.persistence;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
+
+@Table(name = "accountProfiles")
+@Entity
+public class AccountProfile implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private UUID accountId;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    private String linkedInProfile;
+    private String gitHubProfile;
+    private String portfolioSite;
+
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
+
+    protected AccountProfile() {
+    }
+
+    public AccountProfile(UUID accountId, String firstName, String lastName,
+                          String linkedInProfile, String gitHubProfile, String portfolioSite) {
+        this.accountId = accountId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.linkedInProfile = linkedInProfile;
+        this.gitHubProfile = gitHubProfile;
+        this.portfolioSite = portfolioSite;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("AccountProfile[id=%d, accountId='%s', firstName='%s', lastName='%s']",
+                id, accountId.toString(), firstName, lastName);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getLinkedInProfile() {
+        return linkedInProfile;
+    }
+
+    public void setLinkedInProfile(String linkedInProfile) {
+        this.linkedInProfile = linkedInProfile;
+    }
+
+    public String getGitHubProfile() {
+        return gitHubProfile;
+    }
+
+    public void setGitHubProfile(String gitHubProfile) {
+        this.gitHubProfile = gitHubProfile;
+    }
+
+    public String getPortfolioSite() {
+        return portfolioSite;
+    }
+
+    public void setPortfolioSite(String portfolioSite) {
+        this.portfolioSite = portfolioSite;
+    }
+}

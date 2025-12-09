@@ -1,4 +1,6 @@
 package com.appalanche.backend.authentication.business.request_response;
 
-public record LoginResponse(String email, String fullName) {
+import java.util.UUID;
+
+public record LoginResponse(UUID accountId, String email) {
 }

@@ -1,5 +1,6 @@
 package com.appalanche.backend.security.helper;
 
+import com.appalanche.backend.authentication.persistence.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -8,7 +9,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -31,8 +31,12 @@ public class JwtHelper {
         this.jwtParser = Jwts.parser().verifyWith(secretKey).build();
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public UUID extractAccountId(String token) {
+        return UUID.fromString(extractClaim(token, Claims::getSubject));
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, claims -> claims.get("email", String.class));
     }
 
     public List<GrantedAuthority> extractAuthorities(String token) {
@@ -59,31 +63,32 @@ public class JwtHelper {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(Account account) {
+        return generateToken(new HashMap<>(), account);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+    public String generateToken(Map<String, Object> extraClaims, Account account) {
+        return buildToken(extraClaims, account, jwtExpiration);
     }
 
     public long getExpirationTime() {
         return jwtExpiration;
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String buildToken(Map<String, Object> extraClaims, Account account, long expiration) {
         return Jwts.builder()
+                   .claim("email", account.getEmail())
                    .claims(extraClaims)
-                   .subject(userDetails.getUsername())
+                   .subject(account.getAccountId().toString())
                    .issuedAt(new Date(System.currentTimeMillis()))
                    .expiration(new Date(System.currentTimeMillis() + expiration))
                    .signWith(secretKey)
                    .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, Account account) {
+        final UUID accountId = extractAccountId(token);
+        return (accountId.equals(account.getAccountId())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

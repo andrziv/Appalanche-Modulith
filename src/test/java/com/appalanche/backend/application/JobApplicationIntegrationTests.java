@@ -152,7 +152,7 @@ class JobApplicationIntegrationTests {
                                                                                          .withRequisitionId("NOPE")
                                                                                          .withCompany("NOPE")
                                                                                          .build());
-        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                          .withTitle("Principal Network Engineer")
                                                                                          .withRequisitionId("NET-001")
                                                                                          .withCompany("Netflix")
@@ -179,7 +179,7 @@ class JobApplicationIntegrationTests {
         var candidate2 = applicationRepository.save(
                 validUserOneOwnedUniqueApplication(statusCandidate2, experience).build());
         applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate, experience).build());
-        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                                    .build());
 
         var desiredStatusCodes = statusCandidate1.getCode() + "," + statusCandidate2.getCode();
@@ -204,7 +204,7 @@ class JobApplicationIntegrationTests {
         var candidate2 = applicationRepository.save(
                 validUserOneOwnedUniqueApplication(status, experienceCandidate2).build());
         applicationRepository.save(validUserOneOwnedUniqueApplication(status, experienceNonCandidate).build());
-        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experienceCandidate1).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experienceCandidate1).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                                    .build());
 
         var desiredExperienceCodes = experienceCandidate1.getCode() + "," + experienceCandidate2.getCode();
@@ -236,7 +236,7 @@ class JobApplicationIntegrationTests {
         applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(3).build());
         applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(4).build());
         applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withInterest(8).build());
-        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                          .withInterest(6).build());
 
         var interestPredicates = "gte:9,lt:2,between:5:7";
@@ -264,7 +264,7 @@ class JobApplicationIntegrationTests {
                                                                                                           .build());
         applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(nonCandidateDate)
                                                                                          .build());
-        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                          .withApplicationDate(candidateDate1)
                                                                                          .build());
 
@@ -296,7 +296,7 @@ class JobApplicationIntegrationTests {
         applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleNonCandidate, interestCandidate, candidateDate).build());
         applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestNonCandidate, candidateDate).build());
         applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, nonCandidateDate).build());
-        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, candidateDate).withOwnerEmail(USER_EMAIL_2)
+        applicationRepository.save(userOneOwnedHelper(statusCandidate, experienceCandidate, titleCandidate, interestCandidate, candidateDate).withOwnerId(USER_ACCOUNT_ID_2)
                                                                                                                                              .build());
 
         var searchPath = "search=net";
@@ -346,7 +346,7 @@ class JobApplicationIntegrationTests {
         Date newResponseDate = dateOffsetBy(1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_EMAIL_1, "old title", "old company", 1, oldStatus, oldExperience, null, null));
+        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience, null, null));
         var applicationId = existingApplication.getId();
 
         var output = modifyApplication(applicationId, newRequisitionId, newTitle, newCompany, newInterest,
@@ -360,7 +360,7 @@ class JobApplicationIntegrationTests {
                 existingApplication,
                 new JobApplication(
                         newRequisitionId,
-                        USER_EMAIL_1,
+                        USER_ACCOUNT_ID_1,
                         newTitle,
                         newCompany,
                         newInterest,
@@ -376,7 +376,7 @@ class JobApplicationIntegrationTests {
     void shouldDeleteExistingJobApplicationSuccessfully(SecurityScenario scenario) throws Exception {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_EMAIL_1, "old title", "old company", 1, status, experience, null, null));
+        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1, "old title", "old company", 1, status, experience, null, null));
         var applicationId = existingApplication.getId();
 
         var output = deleteApplication(applicationId, scenario);
@@ -398,11 +398,11 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -421,11 +421,11 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -444,11 +444,11 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -467,12 +467,12 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
                 appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -491,12 +491,12 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
                 appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -515,12 +515,12 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience1().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
                 appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -539,12 +539,12 @@ class JobApplicationIntegrationTests {
         String experienceCode = experience2().getCode();
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, unknownStatusCode, experienceCode,
                 appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
@@ -563,12 +563,12 @@ class JobApplicationIntegrationTests {
         String unknownExperienceCode = "BLAARGH";
         Date appliedDate = new Date();
         Date responseDate = new Date();
-        var currentApplicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, unknownExperienceCode,
                 appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_EMAIL_1);
+        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
@@ -584,7 +584,7 @@ class JobApplicationIntegrationTests {
         var responseDate = dateOffsetBy(1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_EMAIL_1,
+        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1,
                 "old title", "old company", 1, oldStatus, oldExperience, appliedDate, responseDate));
         var applicationId = existingApplication.getId();
 
@@ -609,7 +609,7 @@ class JobApplicationIntegrationTests {
         var responseDate = dateOffsetBy(1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_EMAIL_1,
+        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1,
                 "old title", "old company", 1, oldStatus, oldExperience, appliedDate, responseDate));
         var applicationId = existingApplication.getId();
 
@@ -652,7 +652,7 @@ class JobApplicationIntegrationTests {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
         var existingApplication = applicationRepository.save(
-                new JobApplication("0", USER_EMAIL_2, "Other title", "Other company", 1,
+                new JobApplication("0", USER_ACCOUNT_ID_2, "Other title", "Other company", 1,
                         status, experience, null, null));
         var otherUserApplicationId = existingApplication.getId();
 
@@ -688,7 +688,7 @@ class JobApplicationIntegrationTests {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
         var existingApplication = applicationRepository.save(
-                new JobApplication("0", USER_EMAIL_2, "Other title", "Other company", 1,
+                new JobApplication("0", USER_ACCOUNT_ID_2, "Other title", "Other company", 1,
                         status, experience, null, null));
         var otherUserApplicationId = existingApplication.getId();
 
@@ -1085,10 +1085,10 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private long getApplicationAmountFor(String userEmail) {
+    private long getApplicationAmountFor(UUID ownerAccountId) {
         return applicationRepository.findAll()
                                     .stream()
-                                    .filter(app -> app.getOwnerEmail().equals(userEmail))
+                                    .filter(app -> app.getOwnerAccountId().equals(ownerAccountId))
                                     .count();
     }
 }

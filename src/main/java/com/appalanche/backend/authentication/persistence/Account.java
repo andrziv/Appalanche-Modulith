@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Table(name = "accounts")
 @Entity
@@ -17,13 +18,10 @@ public class Account implements UserDetails {
     @Column(nullable = false)
     private Long id;
 
-    @Column(nullable = false)
-    private String firstName;
+    @Column(unique = true, nullable = false)
+    private UUID accountId;
 
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column(unique=true, length = 100, nullable = false)
+    @Column(unique = true, length = 100, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -33,18 +31,18 @@ public class Account implements UserDetails {
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
 
-    protected Account() {}
+    protected Account() {
+    }
 
-    public Account(String firstName, String lastName, String email, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Account(UUID accountId, String email, String password) {
+        this.accountId = accountId;
         this.email = email;
         this.password = password;
     }
 
     @Override
     public String toString() {
-        return String.format("Account[id=%d, firstName='%s', lastName='%s', email='%s']", id, firstName, lastName, email);
+        return String.format("Account[id=%d, accountId='%s', email='%s']", id, accountId, email);
     }
 
     @Override
@@ -85,12 +83,8 @@ public class Account implements UserDetails {
         return id;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
+    public UUID getAccountId() {
+        return accountId;
     }
 
     public String getEmail() {

@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 @Table(name = "applications")
 @Entity
@@ -17,8 +18,8 @@ public class JobApplication implements Serializable {
     @Column(nullable = false, name = "requisition_id")
     private String requisitionId;
 
-    @Column(nullable = false, name = "owner_email")
-    private String ownerEmail;
+    @Column(nullable = false, name = "owner_account_id")
+    private UUID ownerAccountId;
 
     @Column(nullable = false)
     private String title;
@@ -50,11 +51,11 @@ public class JobApplication implements Serializable {
     protected JobApplication() {
     }
 
-    public JobApplication(String requisitionId, String ownerEmail, String title, String company, Integer interest,
+    public JobApplication(String requisitionId, UUID ownerAccountId, String title, String company, Integer interest,
                           JobApplicationStatus status, JobApplicationExperience experience,
                           Date appliedDate, Date responseDate) {
         this.requisitionId = requisitionId;
-        this.ownerEmail = ownerEmail;
+        this.ownerAccountId = ownerAccountId;
         this.title = title;
         this.company = company;
         this.interest = interest;
@@ -66,9 +67,9 @@ public class JobApplication implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("JobApplication[id=%d, requisitionId='%s', ownerEmail='%s', title='%s', " +
+        return String.format("JobApplication[id=%d, requisitionId='%s', ownerAccountId='%s', title='%s', " +
                         "company='%s', interest='%d', status='%s', experience='%s']",
-                id, requisitionId, ownerEmail, title, company, interest, status.getLabel(), experience.getLabel());
+                id, requisitionId, ownerAccountId, title, company, interest, status.getLabel(), experience.getLabel());
     }
 
     public Long getId() {
@@ -83,12 +84,12 @@ public class JobApplication implements Serializable {
         this.requisitionId = requisitionId;
     }
 
-    public String getOwnerEmail() {
-        return ownerEmail;
+    public UUID getOwnerAccountId() {
+        return ownerAccountId;
     }
 
-    public void setOwnerEmail(String ownerEmail) {
-        this.ownerEmail = ownerEmail;
+    public void setOwnerAccountId(UUID ownerAccountId) {
+        this.ownerAccountId = ownerAccountId;
     }
 
     public String getTitle() {

@@ -9,16 +9,17 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.util.StringUtils.hasText;
 
 public class ApplicationSpecificationFactory {
     public static Specification<JobApplication> generateSpecificationList(SearchApplicationRequest searchRequest,
-                                                                          String email) {
+                                                                          UUID ownerAccountId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(criteriaBuilder.equal(root.get("ownerEmail"), email));
+            predicates.add(criteriaBuilder.equal(root.get("ownerAccountId"), ownerAccountId));
 
             if (hasText(searchRequest.search())) {
                 String pattern = "%" + searchRequest.search().toLowerCase() + "%";

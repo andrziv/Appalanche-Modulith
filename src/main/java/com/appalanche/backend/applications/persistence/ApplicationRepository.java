@@ -6,8 +6,9 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ApplicationRepository extends ListCrudRepository<JobApplication, Long>, JpaSpecificationExecutor<JobApplication> {
-    Optional<JobApplication> findByIdAndOwnerEmail(long id, String email);
+    Optional<JobApplication> findByIdAndOwnerAccountId(long id, UUID ownerAccountId);
 }

@@ -6,24 +6,23 @@ import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import com.appalanche.backend.authentication.persistence.Account;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class JobApplicationDataHelper {
-    final static String USER_FIRST_NAME_1 = "Test";
-    final static String USER_LAST_NAME_1 = "User";
+    final static UUID USER_ACCOUNT_ID_1 = UUID.randomUUID();
     final static String USER_EMAIL_1 = "test.user@gmail.com";
     final static String USER_PASSWORD_1 = "1definitely2Secure";
 
-    final static String USER_FIRST_NAME_2 = "Other";
-    final static String USER_LAST_NAME_2 = "User";
+    final static UUID USER_ACCOUNT_ID_2 = UUID.randomUUID();
     final static String USER_EMAIL_2 = "not.main@gmail.com";
     final static String USER_PASSWORD_2 = "blarrrgh@123";
 
     static Account firstAccount() {
-        return new Account(USER_FIRST_NAME_1, USER_LAST_NAME_1, USER_EMAIL_1, USER_PASSWORD_1);
+        return new Account(USER_ACCOUNT_ID_1, USER_EMAIL_1, USER_PASSWORD_1);
     }
 
     static Account secondAccount() {
-        return new Account(USER_FIRST_NAME_2, USER_LAST_NAME_2, USER_EMAIL_2, USER_PASSWORD_2);
+        return new Account(USER_ACCOUNT_ID_2, USER_EMAIL_2, USER_PASSWORD_2);
     }
 
     static JobApplicationStatus oldStatus() {
@@ -66,7 +65,7 @@ public class JobApplicationDataHelper {
     static JobApplication firstUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-001",
-                USER_EMAIL_1,
+                USER_ACCOUNT_ID_1,
                 "Job 1",
                 "Company 1",
                 8,
@@ -78,7 +77,7 @@ public class JobApplicationDataHelper {
     static JobApplication firstUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-002",
-                USER_EMAIL_1,
+                USER_ACCOUNT_ID_1,
                 "Job 2",
                 "Company 2",
                 6,
@@ -90,7 +89,7 @@ public class JobApplicationDataHelper {
     static JobApplication firstUserApplication3(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-003",
-                USER_EMAIL_1,
+                USER_ACCOUNT_ID_1,
                 "Job 3",
                 "Company 1",
                 5,
@@ -102,7 +101,7 @@ public class JobApplicationDataHelper {
     static JobApplication secondUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-004",
-                USER_EMAIL_2,
+                USER_ACCOUNT_ID_2,
                 "Job 4",
                 "Company 3",
                 9,
@@ -114,7 +113,7 @@ public class JobApplicationDataHelper {
     static JobApplication secondUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
                 "R-005",
-                USER_EMAIL_2,
+                USER_ACCOUNT_ID_2,
                 "Job 5",
                 "Company 3",
                 4,
@@ -125,7 +124,7 @@ public class JobApplicationDataHelper {
 
     static JobApplicationBuilder validUserOneOwnedUniqueApplication(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplicationBuilder().withRequisitionId("R-500")
-                                          .withOwnerEmail(USER_EMAIL_1)
+                                          .withOwnerId(USER_ACCOUNT_ID_1)
                                           .withTitle("Unique Job Title")
                                           .withCompany("Unique Company")
                                           .withInterest(10)
@@ -142,7 +141,7 @@ public class JobApplicationDataHelper {
 
     static class JobApplicationBuilder {
         private String requisitionId;
-        private String ownerEmail;
+        private UUID ownerId;
         private String title;
         private String company;
         private Integer interest;
@@ -156,7 +155,7 @@ public class JobApplicationDataHelper {
 
         JobApplicationBuilder(JobApplication application) {
             this.requisitionId = application.getRequisitionId();
-            this.ownerEmail = application.getOwnerEmail();
+            this.ownerId = application.getOwnerAccountId();
             this.title = application.getTitle();
             this.company = application.getCompany();
             this.interest = application.getInterest();
@@ -171,8 +170,8 @@ public class JobApplicationDataHelper {
             return this;
         }
 
-        JobApplicationBuilder withOwnerEmail(String email) {
-            this.ownerEmail = email;
+        JobApplicationBuilder withOwnerId(UUID id) {
+            this.ownerId = id;
             return this;
         }
 
@@ -212,7 +211,7 @@ public class JobApplicationDataHelper {
         }
 
         JobApplication build() {
-            return new JobApplication(requisitionId, ownerEmail, title, company, interest, status, experience,
+            return new JobApplication(requisitionId, ownerId, title, company, interest, status, experience,
                     appliedDate, responseDate);
         }
     }

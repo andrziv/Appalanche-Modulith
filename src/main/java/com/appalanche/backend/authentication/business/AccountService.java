@@ -1,10 +1,12 @@
 package com.appalanche.backend.authentication.business;
 
+import com.appalanche.backend.authentication.business.events.AccountCreationEvent;
 import com.appalanche.backend.authentication.business.exceptions.DuplicationException;
 import com.appalanche.backend.authentication.business.request_response.LoginRequest;
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
 import com.appalanche.backend.authentication.persistence.Account;
 import com.appalanche.backend.authentication.persistence.AccountRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
+
+import static java.util.UUID.randomUUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,11 +25,14 @@ public class AccountService {
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final ApplicationEventPublisher publisher;
 
-    public AccountService(AccountRepository repository, PasswordEncoder encoder, AuthenticationManager authenticationManager) {
+    public AccountService(AccountRepository repository, PasswordEncoder encoder,
+                          AuthenticationManager authenticationManager, ApplicationEventPublisher publisher) {
         this.repository = repository;
         this.passwordEncoder = encoder;
         this.authenticationManager = authenticationManager;
+        this.publisher = publisher;
     }
 
     @Transactional
@@ -36,8 +44,10 @@ public class AccountService {
         }
 
         String hashedPassword = passwordEncoder.encode(request.password());
-        Account account = new Account(request.firstname(), request.surname(), email, hashedPassword);
-        repository.save(account);
+        Account account = new Account(randomUUID(), email, hashedPassword);
+        var createdAccount = repository.save(account);
+
+        publisher.publishEvent(new AccountCreationEvent(createdAccount.getAccountId(), request.firstname(), request.surname()));
     }
 
     public Account authenticate(LoginRequest request) {
@@ -47,6 +57,7 @@ public class AccountService {
     }
 
     public Optional<Account> getCurrentUser() {
-        return repository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        return repository.findByAccountId(UUID.fromString(SecurityContextHolder.getContext().getAuthentication()
+                                                                               .getName()));
     }
 }

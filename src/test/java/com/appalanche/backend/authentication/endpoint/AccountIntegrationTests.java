@@ -34,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
@@ -52,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 public class AccountIntegrationTests {
+    private final static UUID USER_ACCOUNT_ID = UUID.randomUUID();
     private final static String USER_FIRST_NAME = "Test";
     private final static String USER_LAST_NAME = "User";
     private final static String USER_EMAIL = "test.user@gmail.com";
@@ -97,8 +99,6 @@ public class AccountIntegrationTests {
         var account = accountRepository.findByEmail(USER_EMAIL);
         output.andExpect(status().isCreated());
         assertThat(account).isPresent();
-        assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
-        assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
         assertThat(account.get().getPassword()).isNotEqualTo(USER_PASSWORD);
     }
 
@@ -162,7 +162,7 @@ public class AccountIntegrationTests {
         output.andExpect(status().isOk());
         assertNotNull(jwtCookie);
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(jwtHelper.extractUsername(jwtCookie.getValue())).isEqualTo(USER_EMAIL);
+        assertThat(jwtHelper.extractAccountId(jwtCookie.getValue())).isNotNull();
     }
 
     @ParameterizedTest
@@ -184,20 +184,22 @@ public class AccountIntegrationTests {
     @FieldSource("scenarios")
     void shouldAuthenticateSuccessfullyWithValidToken(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL);
+        var accountId = createdAccount.get().getAccountId();
 
-        var output = authenticateToken(scenario);
+        var output = authenticateToken(accountId, scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(expectedHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectedStatusCodeFor(scenario));
-        assertFailedValidationContent(response, scenario);
+        assertAuthenticationResponse(response, scenario);
     }
 
     @NotNull
     private ResultActions registerAccount(String email, String password, SecurityScenario scenario) throws Exception {
         SignupRequest signupData = new SignupRequest(USER_FIRST_NAME, USER_LAST_NAME, email, password);
 
-        var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, email, password);
+        var userAccount = new Account(USER_ACCOUNT_ID, email, password);
         var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = post("/authenticate/signup")
@@ -215,7 +217,7 @@ public class AccountIntegrationTests {
     private ResultActions authenticateAccount(String password, SecurityScenario scenario) throws Exception {
         LoginRequest requestData = new LoginRequest(USER_EMAIL, password);
 
-        var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, USER_EMAIL, password);
+        var userAccount = new Account(USER_ACCOUNT_ID, USER_EMAIL, password);
         var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = post("/authenticate/login")
@@ -230,8 +232,8 @@ public class AccountIntegrationTests {
     }
 
     @NotNull
-    private ResultActions authenticateToken(SecurityScenario scenario) throws Exception {
-        var userAccount = new Account(USER_FIRST_NAME, USER_LAST_NAME, USER_EMAIL, USER_PASSWORD);
+    private ResultActions authenticateToken(UUID accountId, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
         var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = get("/authenticate").contentType(MediaType.APPLICATION_JSON);
@@ -266,13 +268,15 @@ public class AccountIntegrationTests {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void assertFailedValidationContent(MockHttpServletResponse response, SecurityScenario scenario) throws Exception {
+    private void assertAuthenticationResponse(MockHttpServletResponse response, SecurityScenario scenario) throws Exception {
         switch (scenario) {
             case VALID_USER -> {
                 String email = JsonPath.read(response.getContentAsString(), "$.email");
-                String name = JsonPath.read(response.getContentAsString(), "$.fullName");
+                UUID accountId = UUID.fromString(JsonPath.read(response.getContentAsString(), "$.accountId"));
+                var existingAccount = accountRepository.findByEmail(USER_EMAIL);
+                assertThat(existingAccount).isPresent();
                 assertThat(email).isEqualTo(USER_EMAIL);
-                assertThat(name).isEqualTo(USER_FIRST_NAME + " " + USER_LAST_NAME);
+                assertThat(accountId).isEqualTo(existingAccount.get().getAccountId());
             }
             case MALFORMED_TOKEN,
                  EXPIRED_TOKEN,

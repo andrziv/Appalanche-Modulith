@@ -50,7 +50,7 @@ public class AccountAuthController {
 
         response.addHeader(SET_COOKIE, jwtCookie.toString());
 
-        var responseContent = new LoginResponse(authenticatedAccount.getEmail(), authenticatedAccount.getFirstName() + " " + authenticatedAccount.getLastName());
+        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail());
         return ResponseEntity.ok(responseContent);
     }
 
@@ -64,7 +64,7 @@ public class AccountAuthController {
         }
 
         var authenticatedAccount = tokenAccount.get();
-        var responseContent = new LoginResponse(authenticatedAccount.getEmail(), authenticatedAccount.getFirstName() + " " + authenticatedAccount.getLastName());
+        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail());
         return ResponseEntity.ok(responseContent);
     }
 }

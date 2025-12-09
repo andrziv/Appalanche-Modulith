@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,11 +39,11 @@ public class JobApplicationService {
     }
 
     public Optional<JobApplication> getApplication(long id) {
-        return applicationRepository.findByIdAndOwnerEmail(id, getCurrentUserEmail());
+        return applicationRepository.findByIdAndOwnerAccountId(id, getCurrentAccountId());
     }
 
     public Page<JobApplication> searchApplications(SearchApplicationRequest filter, Pageable pageable) {
-        Specification<JobApplication> spec = ApplicationSpecificationFactory.generateSpecificationList(filter, getCurrentUserEmail());
+        Specification<JobApplication> spec = ApplicationSpecificationFactory.generateSpecificationList(filter, getCurrentAccountId());
         return applicationRepository.findAll(spec, pageable);
     }
 
@@ -79,7 +80,7 @@ public class JobApplicationService {
 
         JobApplication application =
                 new JobApplication(request.requisitionId(),
-                        getCurrentUserEmail(),
+                        getCurrentAccountId(),
                         request.title(),
                         request.company(),
                         request.interest(),
@@ -95,9 +96,9 @@ public class JobApplicationService {
     public void modifyApplication(Long applicationId, ModifyApplicationRequest request) {
         logger.info("Received {} to ModifyApplication service method.", request);
 
-        String currentUser = getCurrentUserEmail();
+        UUID currentAccountId = getCurrentAccountId();
 
-        var application = applicationRepository.findByIdAndOwnerEmail(applicationId, currentUser)
+        var application = applicationRepository.findByIdAndOwnerAccountId(applicationId, currentAccountId)
                                                .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         if (request.statusCode() != null) {
@@ -154,15 +155,15 @@ public class JobApplicationService {
     public void removeApplication(Long applicationId) {
         logger.info("Received DeletionRequest[id='{}'] at RemoveApplication service method.", applicationId);
 
-        String currentUser = getCurrentUserEmail();
+        UUID currentAccountId = getCurrentAccountId();
 
-        JobApplication application = applicationRepository.findByIdAndOwnerEmail(applicationId, currentUser)
+        JobApplication application = applicationRepository.findByIdAndOwnerAccountId(applicationId, currentAccountId)
                                                           .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         applicationRepository.delete(application);
     }
 
-    private String getCurrentUserEmail() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+    private UUID getCurrentAccountId() {
+        return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 }
