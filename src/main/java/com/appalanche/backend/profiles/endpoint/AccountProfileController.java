@@ -20,13 +20,13 @@ public class AccountProfileController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AccountProfile> searchApplications() {
+    public ResponseEntity<AccountProfile> getProfile() {
         return ResponseEntity.ok(profileService.getProfile());
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> modifyApplication(@PathVariable UUID accountId,
+    public ResponseEntity<Void> modifyProfile(@PathVariable UUID accountId,
                                                   @RequestBody ModifyAccountProfileRequest request) {
         profileService.modifyProfile(accountId, request);
         return ResponseEntity.noContent().build();
