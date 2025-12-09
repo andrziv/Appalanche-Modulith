@@ -27,7 +27,7 @@ public class AccountProfileController {
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> modifyProfile(@PathVariable UUID accountId,
-                                                  @RequestBody ModifyAccountProfileRequest request) {
+                                              @RequestBody ModifyAccountProfileRequest request) {
         profileService.modifyProfile(accountId, request);
         return ResponseEntity.noContent().build();
     }
