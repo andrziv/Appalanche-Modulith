@@ -78,7 +78,7 @@ pipeline {
                 statusResultSource: [
                     $class: 'ConditionalStatusResultSource',
                     results: [
-                        [$class: 'AnyBuildResult', state: 'FAILURE', message: 'Build is on fire! 🔥🔥🔥 👎😤👎 🔥🔥🔥']
+                        [$class: 'AnyBuildResult', state: 'FAILURE', message: 'Build is on fire! 🔥🔥🔥 👎👎 🔥🔥🔥']
                     ]
                 ]
             ])
