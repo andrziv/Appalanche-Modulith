@@ -10,15 +10,15 @@ public record ModifyAccountProfileRequest(
         @NullOrNotBlank(message = "Last name cannot be blank if provided")
         String surname,
 
-        String linkedInProfileURL,
-        String gitHubProfileURL,
-        String portfolioSiteURL) {
+        String linkedInProfile,
+        String gitHubProfile,
+        String portfolioSite) {
 
     @NonNull
     @Override
     public String toString() {
-        return String.format("ModifyAccountProfileRequest[firstname='%s', surname='%s', linkedInProfileURL='%s', " +
-                        "gitHubProfileURL='%s', portfolioSiteURL='%s']",
-                firstname, surname, linkedInProfileURL, gitHubProfileURL, portfolioSiteURL);
+        return String.format("ModifyAccountProfileRequest[firstname='%s', surname='%s', linkedInProfile='%s', " +
+                        "gitHubProfile='%s', portfolioSite='%s']",
+                firstname, surname, linkedInProfile, gitHubProfile, portfolioSite);
     }
 }

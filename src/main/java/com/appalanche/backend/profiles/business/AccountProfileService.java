@@ -46,20 +46,20 @@ public class AccountProfileService {
             profile.setLastName(request.surname());
         }
 
-        if (request.linkedInProfileURL() != null) {
-            var linkedInSiteURL = request.linkedInProfileURL();
+        if (request.linkedInProfile() != null) {
+            var linkedInSiteURL = request.linkedInProfile();
             var newData = linkedInSiteURL.isBlank() ? null : linkedInSiteURL;
             profile.setLinkedInProfile(newData);
         }
 
-        if (request.gitHubProfileURL() != null) {
-            var gitHubSiteURL = request.gitHubProfileURL();
+        if (request.gitHubProfile() != null) {
+            var gitHubSiteURL = request.gitHubProfile();
             var newData = gitHubSiteURL.isBlank() ? null : gitHubSiteURL;
             profile.setGitHubProfile(newData);
         }
 
-        if (request.portfolioSiteURL() != null) {
-            var portfolioSiteURL = request.portfolioSiteURL();
+        if (request.portfolioSite() != null) {
+            var portfolioSiteURL = request.portfolioSite();
             var newData = portfolioSiteURL.isBlank() ? null : portfolioSiteURL;
             profile.setPortfolioSite(newData);
         }
