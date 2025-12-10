@@ -146,6 +146,23 @@ public class AccountProfileIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldSuccessfullyNullAccountProfileURLsUsingBlankInputs(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
+        directlyModifyProfile(accountId, "https://linkedin.com/blah", "https://github.com/blah", "https://test.blah.dev");
+        var newLinkedIn = " ";
+        var newGitHub = " ";
+        var newPortfolio = " ";
+
+        var output = modifyProfile(accountId, null, null, newLinkedIn, newGitHub, newPortfolio, scenario);
+
+        var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
+        output.andExpect(noContentHttpStatusMatcherFor(scenario));
+        assertAccountContentsGivenScenario(expectedAccount, output.andReturn().getResponse(), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldFailModifyingAccountProfileOfOtherUser(SecurityScenario scenario) throws Exception {
         var otherUserEmail = "other.user@gmail.com";
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
@@ -259,6 +276,27 @@ public class AccountProfileIntegrationTests {
         }
 
         return mockMvc.perform(request);
+    }
+
+    @SuppressWarnings({"ResultOfMethodCallIgnored", "SameParameterValue"})
+    private void directlyModifyProfile(UUID accountId, String linkedInURL, String githubURL, String portfolioURL) {
+        var potentialProfile = accountProfileRepository.findByAccountId(accountId);
+        assertThat(potentialProfile).isPresent();
+
+        var existingProfile = potentialProfile.get();
+        existingProfile.setLinkedInProfile(linkedInURL);
+        existingProfile.setGitHubProfile(githubURL);
+        existingProfile.setPortfolioSite(portfolioURL);
+
+        accountProfileRepository.save(existingProfile);
+
+        var updatedProfile = accountProfileRepository.findByAccountId(accountId).get();
+        assertThat(updatedProfile.getLinkedInProfile()).isEqualTo(linkedInURL)
+                                                       .withFailMessage("Direct LinkedIn update failed!");
+        assertThat(updatedProfile.getGitHubProfile()).isEqualTo(githubURL)
+                                                     .withFailMessage("Direct GitHub update failed!");
+        assertThat(updatedProfile.getPortfolioSite()).isEqualTo(portfolioURL)
+                                                     .withFailMessage("Direct Portfolio update failed!");
     }
 
     private static ResultMatcher noContentHttpStatusMatcherFor(SecurityScenario scenario) {

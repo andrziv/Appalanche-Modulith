@@ -47,15 +47,21 @@ public class AccountProfileService {
         }
 
         if (request.linkedInProfileURL() != null) {
-            profile.setLinkedInProfile(request.linkedInProfileURL());
+            var linkedInSiteURL = request.linkedInProfileURL();
+            var newData = linkedInSiteURL.isBlank() ? null : linkedInSiteURL;
+            profile.setLinkedInProfile(newData);
         }
 
         if (request.gitHubProfileURL() != null) {
-            profile.setGitHubProfile(request.gitHubProfileURL());
+            var gitHubSiteURL = request.gitHubProfileURL();
+            var newData = gitHubSiteURL.isBlank() ? null : gitHubSiteURL;
+            profile.setGitHubProfile(newData);
         }
 
         if (request.portfolioSiteURL() != null) {
-            profile.setPortfolioSite(request.portfolioSiteURL());
+            var portfolioSiteURL = request.portfolioSiteURL();
+            var newData = portfolioSiteURL.isBlank() ? null : portfolioSiteURL;
+            profile.setPortfolioSite(newData);
         }
 
         profileRepository.save(profile);
