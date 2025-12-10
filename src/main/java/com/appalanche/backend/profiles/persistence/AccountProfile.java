@@ -47,7 +47,7 @@ public class AccountProfile implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("AccountProfile[id=%d, accountId='%s', firstName='%s', lastName='%s']",
+        return String.format("AccountProfile[id=%d, accountId='%s', firstname='%s', lastName='%s']",
                 id, accountId.toString(), firstName, lastName);
     }
 

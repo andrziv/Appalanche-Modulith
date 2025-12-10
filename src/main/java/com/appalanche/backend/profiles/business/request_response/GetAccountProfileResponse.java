@@ -6,8 +6,8 @@ import java.util.UUID;
 
 public record GetAccountProfileResponse(
         UUID accountId,
-        String firstName,
-        String lastName,
+        String firstname,
+        String surname,
 
         String linkedInProfile,
         String gitHubProfile,

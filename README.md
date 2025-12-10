@@ -44,15 +44,15 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Returns:
             - `200: OK`, with a return of the profile data in the body:
                 - accountId (`UUID`)
-                - firstName (`String`)
-                - lastName (`String`)
+                - firstname (`String`)
+                - surname (`String`)
                 - linkedInProfile (`String`, URL)
                 - gitHubProfile (`String`, URL)
                 - portfolioSite (`String`, URL)
     - `PATCH /profile`
         - Optional request body fields:
-            - firstName (`String`, if the field is present, it must have at least one non-whitespace char)
-            - lastName (`String`, if the field is present, it must have at least one non-whitespace char)
+            - firstname (`String`, if the field is present, it must have at least one non-whitespace char)
+            - surname (`String`, if the field is present, it must have at least one non-whitespace char)
             - linkedInProfile (`String`, URL)
             - gitHubProfile (`String`, URL)
             - portfolioSite (`String`, URL)
