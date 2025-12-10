@@ -106,17 +106,14 @@ public class AccountProfileIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldAutomaticallyRegisterNewAccountProfileSuccessfully(SecurityScenario scenario) throws Exception {
-        var output = registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var output = registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
 
         output.andExpect(status().isCreated());
-        await().atMost(5, SECONDS).untilAsserted(() -> {
-            var account = accountProfileRepository.findByAccountId(accountId);
-
-            assertThat(account).isPresent();
-            assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
-            assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
-        });
+        var account = accountProfileRepository.findByAccountId(accountId);
+        assertThat(account).isPresent();
+        assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
+        assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
         applicationEvents.stream(AccountCreationEvent.class)
                          .filter(event -> event.accountId().equals(accountId))
                          .findFirst()
@@ -129,7 +126,7 @@ public class AccountProfileIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldSuccessfullyModifyAccountProfileWithValidToken(SecurityScenario scenario) throws Exception {
-        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
         var newFirstName = "New First";
         var newLastName = "New Last";
@@ -147,7 +144,7 @@ public class AccountProfileIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldSuccessfullyNullAccountProfileURLsUsingBlankInputs(SecurityScenario scenario) throws Exception {
-        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
         directlyModifyProfile(accountId, "https://linkedin.com/blah", "https://github.com/blah", "https://test.blah.dev");
         var newLinkedIn = " ";
@@ -165,9 +162,9 @@ public class AccountProfileIntegrationTests {
     @FieldSource("scenarios")
     void shouldFailModifyingAccountProfileOfOtherUser(SecurityScenario scenario) throws Exception {
         var otherUserEmail = "other.user@gmail.com";
-        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         var attackerAccount = accountRepository.findByEmail(USER_EMAIL).get();
-        registerAccount(otherUserEmail, USER_PASSWORD, scenario);
+        registerAccountAndWait(otherUserEmail, USER_PASSWORD, scenario);
         UUID otherAccountId = accountRepository.findByEmail(otherUserEmail).get().getAccountId();
         var newFirstName = "New First";
         var newLastName = "New Last";
@@ -185,7 +182,7 @@ public class AccountProfileIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldFailModifyingAccountProfileWithBlankFirstNameField(SecurityScenario scenario) throws Exception {
-        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
         var newFirstName = " ";
         var newLastName = "New Last";
@@ -205,7 +202,7 @@ public class AccountProfileIntegrationTests {
     @ParameterizedTest
     @FieldSource("scenarios")
     void shouldFailModifyingAccountProfileWithBlankLastNameField(SecurityScenario scenario) throws Exception {
-        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
         var newFirstName = "New First";
         var newLastName = " ";
@@ -224,7 +221,7 @@ public class AccountProfileIntegrationTests {
 
     @SuppressWarnings("SameParameterValue")
     @NotNull
-    private ResultActions registerAccount(String email, String password, SecurityScenario scenario) throws Exception {
+    private ResultActions registerAccountAndWait(String email, String password, SecurityScenario scenario) throws Exception {
         SignupRequest signupData = new SignupRequest(USER_FIRST_NAME, USER_LAST_NAME, email, password);
 
         var userAccount = new Account(USER_ACCOUNT_ID, email, password);
@@ -238,7 +235,13 @@ public class AccountProfileIntegrationTests {
             request.cookie(cookie);
         }
 
-        return mockMvc.perform(request);
+        var resultAction = mockMvc.perform(request);
+        awaitProfileCreation(accountRepository.findByEmail(email).get().getAccountId());
+        return resultAction;
+    }
+
+    private void awaitProfileCreation(UUID accountId) {
+        await().atMost(5, SECONDS).until(() -> accountProfileRepository.findByAccountId(accountId).isPresent());
     }
 
     @NotNull
