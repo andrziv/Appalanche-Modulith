@@ -44,11 +44,13 @@ import java.util.UUID;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
 import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -107,11 +109,14 @@ public class AccountProfileIntegrationTests {
         var output = registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
 
-        var account = accountProfileRepository.findByAccountId(accountId);
         output.andExpect(status().isCreated());
-        assertThat(account).isPresent();
-        assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
-        assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
+        await().atMost(5, SECONDS).untilAsserted(() -> {
+            var account = accountProfileRepository.findByAccountId(accountId);
+
+            assertThat(account).isPresent();
+            assertThat(account.get().getFirstName()).isEqualTo(USER_FIRST_NAME);
+            assertThat(account.get().getLastName()).isEqualTo(USER_LAST_NAME);
+        });
         applicationEvents.stream(AccountCreationEvent.class)
                          .filter(event -> event.accountId().equals(accountId))
                          .findFirst()
