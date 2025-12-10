@@ -1,7 +1,8 @@
 # Appalanche Modulith Project
 
 This project serves as the backend of the Appalanche system. This is my first attempt at a "Secure" Spring server, with
-a reliance on it being a Modulith because I think that having the modules/components be "microservice-like" and standalone
+a reliance on it being a Modulith because I think that having the modules/components be "microservice-like" and
+standalone
 is worth doing, not only because it's interesting, but it also keeps your mind sharper (monoliths are pretty easy to
 build in comparison). It's a pretty simple CRUD server, but it was a nice first "non-tutorial"/copy-paste/cookie cutter
 attempt at something secure, while using Spring's configuration, data (Hibernate), and security frameworks while also
@@ -27,14 +28,39 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
     - Returns:
         - `200: OK`, Returns the JWT needed for other endpoint access as a Strict httpOnly cookie called "accessToken".
             - Also returns content with the following info:
+                - accountId (`UUID`)
                 - email (`String`)
-                - fullName (`String`)
 
 - `GET /authenticate`, **requires a valid `accessToken` JWT cookie to access**
     - Returns:
         - `200: OK`, Returns content with the following info related to the account attached to the JWT:
             - email (`String`)
             - fullName (`String`)
+
+### Profile Endpoints
+
+- **You require a valid `accessToken` JWT cookie to access:**
+    - `GET /profile`
+        - Returns:
+            - `200: OK`, with a return of the profile data in the body:
+                - accountId (`UUID`)
+                - firstName (`String`)
+                - lastName (`String`)
+                - linkedInProfile (`String`, URL)
+                - gitHubProfile (`String`, URL)
+                - portfolioSite (`String`, URL)
+    - `PATCH /profile`
+        - Optional request body fields:
+            - firstName (`String`, if the field is present, it must have at least one non-whitespace char)
+            - lastName (`String`, if the field is present, it must have at least one non-whitespace char)
+            - linkedInProfile (`String`, URL)
+            - gitHubProfile (`String`, URL)
+            - portfolioSite (`String`, URL)
+        - Notes on request body fields:
+            - To null out the object fields, you must set the related request fields to '' or " ". Having them be null or missing will NOT
+              null the related object fields.
+        - Returns:
+            - `204: NO CONTENT`
 
 ### Application Endpoints
 
@@ -96,7 +122,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - ownerEmail (`String`)
             - title (`String`)
             - company (`String`)
-            - interest (`integer`)
+            - interest (`integer`, must be between 1 and 10)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
             - appliedDate (`Date`)
@@ -110,6 +136,15 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
     - `PATCH /application/{id}`
         - Requires the following path field:
             - ID (`long`)
+        - Optional request body fields:
+            - requisitionId (`String`)
+            - title (`String`)
+            - company (`String`)
+            - interest (`integer`, must be between 1 and 10)
+            - statusCode (`String`)
+            - experienceLevelCode (`String`)
+            - appliedDate (`Date`)
+            - responseDate (`Date`)
         - Returns:
             - `204: NO CONTENT`
 
