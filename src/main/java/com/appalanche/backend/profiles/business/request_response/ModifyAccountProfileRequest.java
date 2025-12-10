@@ -1,16 +1,24 @@
 package com.appalanche.backend.profiles.business.request_response;
 
-import jakarta.validation.constraints.NotBlank;
+import com.appalanche.backend.profiles.business.validation.NullOrNotBlank;
+import org.springframework.lang.NonNull;
 
 public record ModifyAccountProfileRequest(
-        @NotBlank(message = "First name cannot be blank")
+        @NullOrNotBlank(message = "First name cannot be blank if provided")
         String firstname,
 
-        @NotBlank(message = "Last name cannot be blank")
+        @NullOrNotBlank(message = "Last name cannot be blank if provided")
         String surname,
 
         String linkedInProfileURL,
         String gitHubProfileURL,
-        String portfolioSiteURL
-) {
+        String portfolioSiteURL) {
+
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format("ModifyAccountProfileRequest[firstname='%s', surname='%s', linkedInProfileURL='%s', " +
+                        "gitHubProfileURL='%s', portfolioSiteURL='%s']",
+                firstname, surname, linkedInProfileURL, gitHubProfileURL, portfolioSiteURL);
+    }
 }

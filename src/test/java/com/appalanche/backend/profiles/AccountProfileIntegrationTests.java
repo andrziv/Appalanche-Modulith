@@ -182,7 +182,7 @@ public class AccountProfileIntegrationTests {
         var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertAccountContentsGivenScenario(expectedAccount, response, scenario);
-        assertFailedValidationContent(response, "{\"firstname\":\"First name cannot be blank\"}", scenario);
+        assertFailedValidationContent(response, "{\"firstname\":\"First name cannot be blank if provided\"}", scenario);
     }
 
     @ParameterizedTest
@@ -202,7 +202,7 @@ public class AccountProfileIntegrationTests {
         var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertAccountContentsGivenScenario(expectedAccount, response, scenario);
-        assertFailedValidationContent(response, "{\"surname\":\"Last name cannot be blank\"}", scenario);
+        assertFailedValidationContent(response, "{\"surname\":\"Last name cannot be blank if provided\"}", scenario);
     }
 
     @SuppressWarnings("SameParameterValue")
