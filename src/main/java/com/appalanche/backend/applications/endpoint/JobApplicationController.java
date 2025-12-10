@@ -58,7 +58,7 @@ public class JobApplicationController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> modifyApplication(@PathVariable Long id, @RequestBody ModifyApplicationRequest request) {
+    public ResponseEntity<Void> modifyApplication(@PathVariable Long id, @Valid @RequestBody ModifyApplicationRequest request) {
         jobApplicationService.modifyApplication(id, request);
         return ResponseEntity.noContent().build();
     }

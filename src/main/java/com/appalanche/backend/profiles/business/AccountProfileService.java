@@ -29,10 +29,12 @@ public class AccountProfileService {
     }
 
     @Transactional
-    public void modifyProfile(UUID accountId, ModifyAccountProfileRequest request) {
+    public void modifyProfile(ModifyAccountProfileRequest request) {
         logger.info("Received {} to ModifyProfile service method.", request);
 
-        var profile = profileRepository.findByAccountId(accountId)
+        // TODO: FUTURE ME, should I automatically create the profile if it doesn't exist? Kind-of unthinkable that an
+        //  account (evidenced by the valid token) exists but the profile doesn't... critical data error?
+        var profile = profileRepository.findByAccountId(getCurrentAccountId())
                                        .orElseThrow(() -> new EntityNotFoundException("Profile not found."));
 
 
