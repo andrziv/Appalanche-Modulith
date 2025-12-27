@@ -57,14 +57,14 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - gitHubProfile (`String`, URL)
             - portfolioSite (`String`, URL)
         - Notes on request body fields:
-            - To null out the object fields, you must set the related request fields to '' or " ". Having them be null or missing will NOT
+            - To null out the object fields, you must set the related request fields to '' or " ". Having them be null
+              or missing will NOT
               null the related object fields.
         - Returns:
             - `204: NO CONTENT`
 
 ### Application Endpoints
 
-- Note that any date-related input fields are to be formatted in `yyyy-MM-dd` format, unless otherwise specified.
 - Note that any Status or Experience Level related `String` inputs require the strings to be exactly one of the
   listed Code entries in the [Status Codes](#status-codes) or [Experience Codes](#experience-codes) sections below,
   respectively.
@@ -84,10 +84,13 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                     - `eq:NUMBER`, find Applications with interest equal to `NUMBER`
                     - `between:NUMBER1:NUMBER2`, find Applications with interest between `NUMBER1` and `NUMBER2`,
                       inclusive
-            - appliedAfter (`Date`)
-            - appliedBefore (`Date`)
-            - responseAfter (`Date`)
-            - responseBefore (`Date`)
+            - appliedAfter (ISO 8601 `Date`, format: `yyyy-MM-dd`)
+            - appliedBefore (ISO 8601 `Date`, format: `yyyy-MM-dd`)
+            - responseAfter (ISO 8601 `Date`, format: `yyyy-MM-dd`)
+            - responseBefore (ISO 8601 `Date`, format: `yyyy-MM-dd`)
+        - Notes on request body fields:
+            - The after/before dates are inclusive. An application with a responseDate of 2025-12-25T20:00:30Z will
+              be caught by a "before" query at 2025-12-25.
 
     - `GET /application/{id}`
         - Requires the following path field:
@@ -112,21 +115,20 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                     - code (`String`)
                     - label (`String`)
                     - description (`String`)
-                - appliedDate (`Date`)
-                - responseDate (`Date`)
-                - createdAt (`Date`)
+                - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
+                - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
+                - createdAt (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
 
     - `POST /application`
         - Requires the following fields:
             - requisitionId (`String`)
-            - ownerEmail (`String`)
             - title (`String`)
             - company (`String`)
             - interest (`integer`, must be between 1 and 10)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
-            - appliedDate (`Date`)
-            - responseDate (`Date`)
+            - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
+            - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
             - `201: CREATED` with...
                 - a return of the newly created application ID in the body:
@@ -143,8 +145,8 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - interest (`integer`, must be between 1 and 10)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
-            - appliedDate (`Date`)
-            - responseDate (`Date`)
+            - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
+            - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
             - `204: NO CONTENT`
 
