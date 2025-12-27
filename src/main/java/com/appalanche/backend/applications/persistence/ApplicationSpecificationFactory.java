@@ -7,7 +7,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,16 +51,24 @@ public class ApplicationSpecificationFactory {
             }
 
             if (searchRequest.appliedAfter() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("appliedDate"), searchRequest.appliedAfter()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(
+                        root.get("appliedDate"),
+                        startOfDay(searchRequest.appliedAfter())));
             }
             if (searchRequest.appliedBefore() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("appliedDate"), searchRequest.appliedBefore()));
+                predicates.add(criteriaBuilder.lessThan(
+                        root.get("appliedDate"),
+                        startOfNextDay(searchRequest.appliedBefore())));
             }
             if (searchRequest.responseAfter() != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("responseDate"), searchRequest.responseAfter()));
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(
+                        root.get("responseDate"),
+                        startOfDay(searchRequest.responseAfter())));
             }
             if (searchRequest.responseBefore() != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("responseDate"), searchRequest.responseBefore()));
+                predicates.add(criteriaBuilder.lessThan(
+                        root.get("responseDate"),
+                        startOfNextDay(searchRequest.responseBefore())));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -81,5 +92,15 @@ public class ApplicationSpecificationFactory {
             }
             default -> throw new IllegalArgumentException("Unknown interest operator: " + operator);
         };
+    }
+
+    private static Date startOfDay(Date date) {
+        var dayStart = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay();
+        return Date.from(dayStart.toInstant(ZoneOffset.UTC));
+    }
+
+    private static Date startOfNextDay(Date date) {
+        var nextDayStart = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(1).atStartOfDay();
+        return Date.from(nextDayStart.toInstant(ZoneOffset.UTC));
     }
 }
