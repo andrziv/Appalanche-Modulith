@@ -79,7 +79,8 @@ public class JobApplicationService {
         }
 
         JobApplication application =
-                new JobApplication(request.requisitionId(),
+                new JobApplication(UUID.randomUUID(),
+                        request.requisitionId(),
                         getCurrentAccountId(),
                         request.title(),
                         request.company(),

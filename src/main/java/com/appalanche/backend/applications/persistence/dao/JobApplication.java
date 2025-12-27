@@ -12,8 +12,11 @@ import java.util.UUID;
 public class JobApplication implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Long id;
+
+    @Column(unique = true, nullable = false, updatable = false)
+    private UUID applicationId;
 
     @Column(nullable = false, name = "requisition_id")
     private String requisitionId;
@@ -51,9 +54,10 @@ public class JobApplication implements Serializable {
     protected JobApplication() {
     }
 
-    public JobApplication(String requisitionId, UUID ownerAccountId, String title, String company, Integer interest,
-                          JobApplicationStatus status, JobApplicationExperience experience,
+    public JobApplication(UUID applicationId, String requisitionId, UUID ownerAccountId, String title, String company,
+                          Integer interest, JobApplicationStatus status, JobApplicationExperience experience,
                           Instant appliedDate, Instant responseDate) {
+        this.applicationId = applicationId;
         this.requisitionId = requisitionId;
         this.ownerAccountId = ownerAccountId;
         this.title = title;
@@ -67,13 +71,21 @@ public class JobApplication implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("JobApplication[id=%d, requisitionId='%s', ownerAccountId='%s', title='%s', " +
+        return String.format("JobApplication[id=%d, applicationId='%s', requisitionId='%s', ownerAccountId='%s', title='%s', " +
                         "company='%s', interest='%d', status='%s', experience='%s']",
-                id, requisitionId, ownerAccountId, title, company, interest, status.getLabel(), experience.getLabel());
+                id, applicationId, requisitionId, ownerAccountId, title, company, interest, status.getLabel(), experience.getLabel());
     }
 
     public Long getId() {
         return id;
+    }
+
+    public UUID getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(UUID applicationId) {
+        this.applicationId = applicationId;
     }
 
     public String getRequisitionId() {

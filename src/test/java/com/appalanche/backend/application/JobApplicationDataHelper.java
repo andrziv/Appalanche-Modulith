@@ -64,6 +64,7 @@ public class JobApplicationDataHelper {
 
     static JobApplication firstUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
+                UUID.randomUUID(),
                 "R-001",
                 USER_ACCOUNT_ID_1,
                 "Job 1",
@@ -76,6 +77,7 @@ public class JobApplicationDataHelper {
 
     static JobApplication firstUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
+                UUID.randomUUID(),
                 "R-002",
                 USER_ACCOUNT_ID_1,
                 "Job 2",
@@ -88,6 +90,7 @@ public class JobApplicationDataHelper {
 
     static JobApplication firstUserApplication3(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
+                UUID.randomUUID(),
                 "R-003",
                 USER_ACCOUNT_ID_1,
                 "Job 3",
@@ -100,6 +103,7 @@ public class JobApplicationDataHelper {
 
     static JobApplication secondUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
+                UUID.randomUUID(),
                 "R-004",
                 USER_ACCOUNT_ID_2,
                 "Job 4",
@@ -112,6 +116,7 @@ public class JobApplicationDataHelper {
 
     static JobApplication secondUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
         return new JobApplication(
+                UUID.randomUUID(),
                 "R-005",
                 USER_ACCOUNT_ID_2,
                 "Job 5",
@@ -123,7 +128,8 @@ public class JobApplicationDataHelper {
     }
 
     static JobApplicationBuilder validUserOneOwnedUniqueApplication(JobApplicationStatus status, JobApplicationExperience experience) {
-        return new JobApplicationBuilder().withRequisitionId("R-500")
+        return new JobApplicationBuilder().withApplicationId(UUID.randomUUID())
+                                          .withRequisitionId("R-500")
                                           .withOwnerId(USER_ACCOUNT_ID_1)
                                           .withTitle("Unique Job Title")
                                           .withCompany("Unique Company")
@@ -140,6 +146,7 @@ public class JobApplicationDataHelper {
     }
 
     static class JobApplicationBuilder {
+        private UUID applicationId;
         private String requisitionId;
         private UUID ownerId;
         private String title;
@@ -154,6 +161,7 @@ public class JobApplicationDataHelper {
         }
 
         JobApplicationBuilder(JobApplication application) {
+            this.applicationId = application.getApplicationId();
             this.requisitionId = application.getRequisitionId();
             this.ownerId = application.getOwnerAccountId();
             this.title = application.getTitle();
@@ -163,6 +171,11 @@ public class JobApplicationDataHelper {
             this.experience = application.getExperience();
             this.appliedDate = application.getAppliedDate();
             this.responseDate = application.getResponseDate();
+        }
+
+        JobApplicationBuilder withApplicationId(UUID applicationId) {
+            this.applicationId = applicationId;
+            return this;
         }
 
         JobApplicationBuilder withRequisitionId(String requisitionId) {
@@ -211,8 +224,8 @@ public class JobApplicationDataHelper {
         }
 
         JobApplication build() {
-            return new JobApplication(requisitionId, ownerId, title, company, interest, status, experience,
-                    appliedDate, responseDate);
+            return new JobApplication(applicationId, requisitionId, ownerId, title, company, interest, status,
+                    experience, appliedDate, responseDate);
         }
     }
 }

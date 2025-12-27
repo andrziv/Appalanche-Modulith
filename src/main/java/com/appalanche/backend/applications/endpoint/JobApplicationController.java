@@ -7,9 +7,11 @@ import com.appalanche.backend.applications.business.request_response.ModifyAppli
 import com.appalanche.backend.applications.business.request_response.SearchApplicationRequest;
 import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +27,20 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 @RestController
 public class JobApplicationController {
     private final JobApplicationService jobApplicationService;
+    private final PagedResourcesAssembler<JobApplication> pagedResourcesAssembler;
 
-    public JobApplicationController(JobApplicationService jobApplicationService) {
+    public JobApplicationController(JobApplicationService jobApplicationService,
+                                    PagedResourcesAssembler<JobApplication> pagedResourcesAssembler) {
         this.jobApplicationService = jobApplicationService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<JobApplication>> searchApplications(@ModelAttribute SearchApplicationRequest request,
-                                                                   @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
-        return ResponseEntity.ok(jobApplicationService.searchApplications(request, pageable));
+    public ResponseEntity<PagedModel<EntityModel<JobApplication>>> searchApplications(@ModelAttribute SearchApplicationRequest request,
+                                                                                      @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
+        var pagedModelReturn = pagedResourcesAssembler.toModel(jobApplicationService.searchApplications(request, pageable));
+        return ResponseEntity.ok(pagedModelReturn);
     }
 
     @GetMapping("/{id}")

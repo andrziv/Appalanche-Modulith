@@ -388,7 +388,7 @@ class JobApplicationIntegrationTests {
         var newResponseDate = dateOffsetBy(-1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience, null, null));
+        var existingApplication = applicationRepository.save(new JobApplication(UUID.randomUUID(), "0", USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience, null, null));
         var applicationId = existingApplication.getId();
 
         var output = modifyApplication(applicationId, newRequisitionId, newTitle, newCompany, newInterest,
@@ -401,6 +401,7 @@ class JobApplicationIntegrationTests {
                 applicationId,
                 existingApplication,
                 new JobApplication(
+                        UUID.randomUUID(),
                         newRequisitionId,
                         USER_ACCOUNT_ID_1,
                         newTitle,
@@ -418,7 +419,9 @@ class JobApplicationIntegrationTests {
     void shouldDeleteExistingJobApplicationSuccessfully(SecurityScenario scenario) throws Exception {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1, "old title", "old company", 1, status, experience, null, null));
+        var existingApplication = applicationRepository.save(new JobApplication(UUID.randomUUID(), "0",
+                USER_ACCOUNT_ID_1, "old title", "old company", 1, status, experience,
+                null, null));
         var applicationId = existingApplication.getId();
 
         var output = deleteApplication(applicationId, scenario);
@@ -626,8 +629,9 @@ class JobApplicationIntegrationTests {
         var responseDate = dateOffsetBy(1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1,
-                "old title", "old company", 1, oldStatus, oldExperience, appliedDate, responseDate));
+        var existingApplication = applicationRepository.save(new JobApplication(UUID.randomUUID(), "0",
+                USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience,
+                appliedDate, responseDate));
         var applicationId = existingApplication.getId();
 
         var output = modifyApplication(applicationId, null, null, null, null,
@@ -651,8 +655,9 @@ class JobApplicationIntegrationTests {
         var responseDate = dateOffsetBy(1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1,
-                "old title", "old company", 1, oldStatus, oldExperience, appliedDate, responseDate));
+        var existingApplication = applicationRepository.save(new JobApplication(UUID.randomUUID(), "0",
+                USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience,
+                appliedDate, responseDate));
         var applicationId = existingApplication.getId();
 
         var output = modifyApplication(applicationId, null, null, null, null,
@@ -694,8 +699,8 @@ class JobApplicationIntegrationTests {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
         var existingApplication = applicationRepository.save(
-                new JobApplication("0", USER_ACCOUNT_ID_2, "Other title", "Other company", 1,
-                        status, experience, null, null));
+                new JobApplication(UUID.randomUUID(), "0", USER_ACCOUNT_ID_2, "Other title",
+                        "Other company", 1, status, experience, null, null));
         var otherUserApplicationId = existingApplication.getId();
 
         var output = modifyApplication(otherUserApplicationId, "Hacked!", "Hacked!", "Hacked!",
@@ -730,8 +735,8 @@ class JobApplicationIntegrationTests {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
         var existingApplication = applicationRepository.save(
-                new JobApplication("0", USER_ACCOUNT_ID_2, "Other title", "Other company", 1,
-                        status, experience, null, null));
+                new JobApplication(UUID.randomUUID(), "0", USER_ACCOUNT_ID_2, "Other title",
+                        "Other company", 1, status, experience, null, null));
         var otherUserApplicationId = existingApplication.getId();
 
         var output = deleteApplication(otherUserApplicationId, VALID_USER);
@@ -952,12 +957,12 @@ class JobApplicationIntegrationTests {
             case VALID_USER -> {
                 var rootNode = objectMapper.readTree(response.getContentAsString());
                 var applications = objectMapper.readValue(
-                        rootNode.get("content").traverse(),
+                        rootNode.get("_embedded").get("jobApplicationList").traverse(),
                         new TypeReference<List<JobApplication>>() {
                         });
                 assertThat(applications)
                         .usingRecursiveComparison()
-                        .ignoringFields("id", "appliedDate", "responseDate", "createdAt")
+                        .ignoringFields("id", "applicationId", "appliedDate", "responseDate", "createdAt")
                         .withEqualsForType((status1, status2) ->
                                         status1.getCode().equals(status2.getCode()),
                                 JobApplicationStatus.class)
@@ -1013,7 +1018,7 @@ class JobApplicationIntegrationTests {
         switch (scenario) {
             case VALID_USER -> assertThat(existingApplication)
                     .usingRecursiveComparison()
-                    .ignoringFields("id", "createdAt")
+                    .ignoringFields("id", "applicationId", "createdAt")
                     .withEqualsForType((status1, status2) ->
                                     status1.getCode().equals(status2.getCode()),
                             JobApplicationStatus.class)
@@ -1029,7 +1034,7 @@ class JobApplicationIntegrationTests {
                  FAKE_TOKEN,
                  NO_TOKEN -> assertThat(existingApplication)
                     .usingRecursiveComparison()
-                    .ignoringFields("id", "createdAt")
+                    .ignoringFields("id", "applicationId", "createdAt")
                     .withEqualsForType((status1, status2) ->
                                     status1.getCode().equals(status2.getCode()),
                             JobApplicationStatus.class)
