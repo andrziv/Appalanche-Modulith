@@ -37,7 +37,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
@@ -255,7 +257,7 @@ class JobApplicationIntegrationTests {
         var candidateDate1 = dateOffsetBy(1);
         var candidateDate2 = dateOffsetBy(25);
         var nonCandidateDate = dateOffsetBy(-48);
-        var formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(candidateDate1);
+        var formattedDate = LocalDate.ofInstant(candidateDate1, ZoneId.of("UTC"));
         var status = statusRepository.save(status1());
         var experience = experienceRepository.save(experience1());
         var candidate1 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1)
@@ -303,7 +305,7 @@ class JobApplicationIntegrationTests {
         var statusPath = "statusCodes=" + statusCandidate.getCode();
         var experiencePath = "experienceLevelCodes=" + experienceCandidate.getCode();
         var interestPredicates = "interestCriteria=eq:" + interestCandidate;
-        var responseDatePath = "responseAfter=" + new SimpleDateFormat("yyyy-MM-dd").format(candidateDate);
+        var responseDatePath = "responseAfter=" + LocalDate.ofInstant(candidateDate, ZoneId.of("UTC"));
         var fullPath = join("&", searchPath, statusPath, experiencePath, interestPredicates, responseDatePath);
         var output = getAllApplications(fullPath, scenario);
 
@@ -322,8 +324,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
 
         var output = createApplication(requisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
 
@@ -342,8 +344,8 @@ class JobApplicationIntegrationTests {
         int newInterest = 9;
         JobApplicationStatus newStatus = status1();
         JobApplicationExperience newExperience = experience1();
-        Date newAppliedDate = dateOffsetBy(1);
-        Date newResponseDate = dateOffsetBy(1);
+        var newAppliedDate = dateOffsetBy(-1);
+        var newResponseDate = dateOffsetBy(-1);
         var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
         var existingApplication = applicationRepository.save(new JobApplication("0", USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience, null, null));
@@ -396,8 +398,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
@@ -419,8 +421,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
@@ -442,8 +444,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, appliedDate, responseDate, scenario);
@@ -465,8 +467,8 @@ class JobApplicationIntegrationTests {
         int interest = 0;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
@@ -489,8 +491,8 @@ class JobApplicationIntegrationTests {
         int interest = 11;
         String statusCode = status1().getCode();
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
@@ -513,8 +515,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = " ";
         String experienceCode = experience1().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode,
@@ -537,8 +539,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String unknownStatusCode = "BLAARGH";
         String experienceCode = experience2().getCode();
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, unknownStatusCode, experienceCode,
@@ -561,8 +563,8 @@ class JobApplicationIntegrationTests {
         int interest = 9;
         String statusCode = status1().getCode();
         String unknownExperienceCode = "BLAARGH";
-        Date appliedDate = new Date();
-        Date responseDate = new Date();
+        var appliedDate = Instant.now();
+        var responseDate = Instant.now();
         var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, unknownExperienceCode,
@@ -635,8 +637,8 @@ class JobApplicationIntegrationTests {
         int newInterest = 9;
         JobApplicationStatus newStatus = status1();
         JobApplicationExperience newExperience = experience1();
-        Date newAppliedDate = dateOffsetBy(1);
-        Date newResponseDate = dateOffsetBy(1);
+        var newAppliedDate = dateOffsetBy(-1);
+        var newResponseDate = dateOffsetBy(-1);
 
         var output = modifyApplication(999999, newRequisitionId, newTitle, newCompany, newInterest,
                 newStatus.getCode(), newExperience.getCode(), newAppliedDate, newResponseDate, scenario);
@@ -726,7 +728,7 @@ class JobApplicationIntegrationTests {
 
     @NotNull
     private ResultActions createApplication(String requisitionId, String title, String company, Integer interestRating,
-                                            String statusCode, String experienceCode, Date appliedDate, Date responseDate,
+                                            String statusCode, String experienceCode, Instant appliedDate, Instant responseDate,
                                             SecurityScenario scenario) throws Exception {
         AddApplicationRequest requestData =
                 new AddApplicationRequest(
@@ -755,7 +757,7 @@ class JobApplicationIntegrationTests {
     @NotNull
     private ResultActions modifyApplication(long id, String requisitionId, String title, String company,
                                             Integer interestRating, String statusCode, String experienceCode,
-                                            Date appliedDate, Date responseDate, SecurityScenario scenario) throws Exception {
+                                            Instant appliedDate, Instant responseDate, SecurityScenario scenario) throws Exception {
         ModifyApplicationRequest requestData =
                 new ModifyApplicationRequest(
                         requisitionId,
@@ -1076,12 +1078,12 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static Date dateOffsetBy(int hours) {
+    private static Instant dateOffsetBy(int hours) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(Calendar.HOUR_OF_DAY, hours);
 
-        return calendar.getTime();
+        return calendar.getTime().toInstant();
     }
 
     @SuppressWarnings("SameParameterValue")

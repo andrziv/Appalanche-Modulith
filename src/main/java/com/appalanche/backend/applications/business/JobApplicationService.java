@@ -18,7 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,13 +67,13 @@ public class JobApplicationService {
 
         var appliedDate = request.appliedDate();
         if (appliedDate == null) {
-            appliedDate = new Date(System.currentTimeMillis());
+            appliedDate = Instant.now();
         }
 
         var responseDate = request.responseDate();
         if (responseDate == null) {
             responseDate = appliedDate;
-        } else if (responseDate.before(appliedDate)) {
+        } else if (responseDate.isBefore(appliedDate)) {
             appliedDate = responseDate;
             logger.warn("Response date detected to be before the Applied date on Application creation. Setting Applied date to Response date.");
         }

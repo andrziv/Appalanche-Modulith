@@ -1,10 +1,10 @@
 package com.appalanche.backend.applications.business.request_response;
 
+import jakarta.validation.constraints.PastOrPresent;
 import org.hibernate.validator.constraints.Range;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.NonNull;
 
-import java.util.Date;
+import java.time.Instant;
 
 public record ModifyApplicationRequest(
         String requisitionId,
@@ -17,11 +17,11 @@ public record ModifyApplicationRequest(
         String statusCode,
         String experienceLevelCode,
 
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date appliedDate,
+        @PastOrPresent(message = "Application cannot be from the future")
+        Instant appliedDate,
 
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date responseDate) {
+        @PastOrPresent(message = "Response cannot be from the future")
+        Instant responseDate) {
 
     @NonNull
     @Override

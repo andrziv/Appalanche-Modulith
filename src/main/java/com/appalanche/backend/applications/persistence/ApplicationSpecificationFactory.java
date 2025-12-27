@@ -7,10 +7,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,13 +94,13 @@ public class ApplicationSpecificationFactory {
         };
     }
 
-    private static Date startOfDay(Date date) {
-        var dayStart = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay();
-        return Date.from(dayStart.toInstant(ZoneOffset.UTC));
+    private static Instant startOfDay(LocalDate date) {
+        var dayStart = date.atStartOfDay();
+        return dayStart.toInstant(ZoneOffset.UTC);
     }
 
-    private static Date startOfNextDay(Date date) {
-        var nextDayStart = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(1).atStartOfDay();
-        return Date.from(nextDayStart.toInstant(ZoneOffset.UTC));
+    private static Instant startOfNextDay(LocalDate date) {
+        var nextDayStart = date.plusDays(1).atStartOfDay();
+        return nextDayStart.toInstant(ZoneOffset.UTC);
     }
 }

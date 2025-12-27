@@ -1,8 +1,6 @@
 package com.appalanche.backend.applications.business.request_response;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public record SearchApplicationRequest(
@@ -11,15 +9,8 @@ public record SearchApplicationRequest(
         List<String> experienceLevelCodes,
         List<String> interestCriteria,
 
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date appliedAfter,
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date appliedBefore,
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date responseAfter,
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        Date responseBefore) {
+        LocalDate appliedAfter,
+        LocalDate appliedBefore,
+        LocalDate responseAfter,
+        LocalDate responseBefore) {
 }

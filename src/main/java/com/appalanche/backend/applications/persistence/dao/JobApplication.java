@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 @Table(name = "applications")
@@ -39,21 +39,21 @@ public class JobApplication implements Serializable {
     private JobApplicationExperience experience;
 
     @Column(name = "date_applied")
-    private Date appliedDate;
+    private Instant appliedDate;
 
     @Column(name = "date_response")
-    private Date responseDate;
+    private Instant responseDate;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
-    private Date createdAt;
+    private Instant createdAt;
 
     protected JobApplication() {
     }
 
     public JobApplication(String requisitionId, UUID ownerAccountId, String title, String company, Integer interest,
                           JobApplicationStatus status, JobApplicationExperience experience,
-                          Date appliedDate, Date responseDate) {
+                          Instant appliedDate, Instant responseDate) {
         this.requisitionId = requisitionId;
         this.ownerAccountId = ownerAccountId;
         this.title = title;
@@ -132,23 +132,23 @@ public class JobApplication implements Serializable {
         this.experience = experience;
     }
 
-    public Date getAppliedDate() {
+    public Instant getAppliedDate() {
         return appliedDate;
     }
 
-    public void setAppliedDate(Date appliedDate) {
+    public void setAppliedDate(Instant appliedDate) {
         this.appliedDate = appliedDate;
     }
 
-    public Date getResponseDate() {
+    public Instant getResponseDate() {
         return responseDate;
     }
 
-    public void setResponseDate(Date responseDate) {
+    public void setResponseDate(Instant responseDate) {
         this.responseDate = responseDate;
     }
 
-    public Date getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 }

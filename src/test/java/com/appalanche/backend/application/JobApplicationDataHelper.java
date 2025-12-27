@@ -5,7 +5,7 @@ import com.appalanche.backend.applications.persistence.dao.JobApplicationExperie
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import com.appalanche.backend.authentication.persistence.Account;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 public class JobApplicationDataHelper {
@@ -71,7 +71,7 @@ public class JobApplicationDataHelper {
                 8,
                 status,
                 experience,
-                new Date(), new Date());
+                Instant.now(), Instant.now());
     }
 
     static JobApplication firstUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
@@ -83,7 +83,7 @@ public class JobApplicationDataHelper {
                 6,
                 status,
                 experience,
-                new Date(), new Date());
+                Instant.now(), Instant.now());
     }
 
     static JobApplication firstUserApplication3(JobApplicationStatus status, JobApplicationExperience experience) {
@@ -95,7 +95,7 @@ public class JobApplicationDataHelper {
                 5,
                 status,
                 experience,
-                new Date(), new Date());
+                Instant.now(), Instant.now());
     }
 
     static JobApplication secondUserApplication1(JobApplicationStatus status, JobApplicationExperience experience) {
@@ -107,7 +107,7 @@ public class JobApplicationDataHelper {
                 9,
                 status,
                 experience,
-                new Date(), new Date());
+                Instant.now(), Instant.now());
     }
 
     static JobApplication secondUserApplication2(JobApplicationStatus status, JobApplicationExperience experience) {
@@ -119,7 +119,7 @@ public class JobApplicationDataHelper {
                 4,
                 status,
                 experience,
-                new Date(), new Date());
+                Instant.now(), Instant.now());
     }
 
     static JobApplicationBuilder validUserOneOwnedUniqueApplication(JobApplicationStatus status, JobApplicationExperience experience) {
@@ -133,7 +133,7 @@ public class JobApplicationDataHelper {
     }
 
     static JobApplicationBuilder userOneOwnedHelper(JobApplicationStatus status, JobApplicationExperience experience,
-                                                    String title, Integer interest, Date responseDate) {
+                                                    String title, Integer interest, Instant responseDate) {
         return validUserOneOwnedUniqueApplication(status, experience).withTitle(title)
                                                                      .withInterest(interest)
                                                                      .withResponseDate(responseDate);
@@ -147,8 +147,8 @@ public class JobApplicationDataHelper {
         private Integer interest;
         private JobApplicationStatus status;
         private JobApplicationExperience experience;
-        private Date appliedDate;
-        private Date responseDate;
+        private Instant appliedDate;
+        private Instant responseDate;
 
         JobApplicationBuilder() {
         }
@@ -200,12 +200,12 @@ public class JobApplicationDataHelper {
             return this;
         }
 
-        JobApplicationBuilder withApplicationDate(Date applicationDate) {
+        JobApplicationBuilder withApplicationDate(Instant applicationDate) {
             this.appliedDate = applicationDate;
             return this;
         }
 
-        JobApplicationBuilder withResponseDate(Date responseDate) {
+        JobApplicationBuilder withResponseDate(Instant responseDate) {
             this.responseDate = responseDate;
             return this;
         }
