@@ -280,6 +280,46 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredApplicationAndResponseRanges(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var candidateDate1 = dateOffsetBy(1);
+        var candidateDate2 = dateOffsetBy(25);
+        var nonCandidateDate = dateOffsetBy(-48);
+        var formattedAfterDate = LocalDate.ofInstant(candidateDate1, ZoneId.of("UTC"));
+        var formattedBeforeDate = LocalDate.ofInstant(candidateDate2, ZoneId.of("UTC"));
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1)
+                                                                                                          .withResponseDate(candidateDate2)
+                                                                                                          .build());
+        var candidate2 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate2)
+                                                                                                          .withResponseDate(candidateDate1)
+                                                                                                          .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(nonCandidateDate)
+                                                                                         .withResponseDate(nonCandidateDate)
+                                                                                         .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1)
+                                                                                         .withResponseDate(nonCandidateDate)
+                                                                                         .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(nonCandidateDate)
+                                                                                         .withResponseDate(candidateDate1)
+                                                                                         .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerId(USER_ACCOUNT_ID_2)
+                                                                                         .withApplicationDate(candidateDate1)
+                                                                                         .build());
+
+        var appliedRangePath = "appliedAfter=" + formattedAfterDate + '&' + "appliedBefore=" + formattedBeforeDate;
+        var responseRangePath = "responseAfter=" + formattedAfterDate + '&' + "responseBefore=" + formattedBeforeDate;
+        var output = getAllApplications(appliedRangePath + '&' + responseRangePath, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldGetAllApplicationsMatchingCompositeSearchCriteria(SecurityScenario scenario) throws Exception {
         clearAllRepositories();
         var titleCandidate = "Principal Network Engineer";
