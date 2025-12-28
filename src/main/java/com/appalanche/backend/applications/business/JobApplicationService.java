@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,8 +37,9 @@ public class JobApplicationService {
         this.experienceRepository = experienceRepository;
     }
 
-    public Optional<JobApplication> getApplication(long id) {
-        return applicationRepository.findByIdAndOwnerAccountId(id, getCurrentAccountId());
+    public JobApplication getApplication(long id) {
+        return applicationRepository.findByIdAndOwnerAccountId(id, getCurrentAccountId())
+                                    .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
     }
 
     public Page<JobApplication> searchApplications(SearchApplicationRequest filter, Pageable pageable) {

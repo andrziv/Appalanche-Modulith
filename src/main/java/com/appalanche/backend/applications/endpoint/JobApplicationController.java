@@ -1,6 +1,8 @@
 package com.appalanche.backend.applications.endpoint;
 
 import com.appalanche.backend.applications.business.JobApplicationService;
+import com.appalanche.backend.applications.business.hateoas.JobApplicationModel;
+import com.appalanche.backend.applications.business.hateoas.JobApplicationModelAssembler;
 import com.appalanche.backend.applications.business.request_response.AddApplicationRequest;
 import com.appalanche.backend.applications.business.request_response.AddApplicationResponse;
 import com.appalanche.backend.applications.business.request_response.ModifyApplicationRequest;
@@ -10,15 +12,12 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
@@ -28,27 +27,31 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 public class JobApplicationController {
     private final JobApplicationService jobApplicationService;
     private final PagedResourcesAssembler<JobApplication> pagedResourcesAssembler;
+    private final JobApplicationModelAssembler jobApplicationModelAssembler;
 
     public JobApplicationController(JobApplicationService jobApplicationService,
-                                    PagedResourcesAssembler<JobApplication> pagedResourcesAssembler) {
+                                    PagedResourcesAssembler<JobApplication> pagedResourcesAssembler,
+                                    JobApplicationModelAssembler jobApplicationModelAssembler) {
         this.jobApplicationService = jobApplicationService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.jobApplicationModelAssembler = jobApplicationModelAssembler;
     }
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PagedModel<EntityModel<JobApplication>>> searchApplications(@ModelAttribute SearchApplicationRequest request,
-                                                                                      @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
-        var pagedModelReturn = pagedResourcesAssembler.toModel(jobApplicationService.searchApplications(request, pageable));
+    public ResponseEntity<PagedModel<JobApplicationModel>> searchApplications(@ModelAttribute SearchApplicationRequest request,
+                                                                              @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
+        var pagedModelReturn = pagedResourcesAssembler.toModel(
+                jobApplicationService.searchApplications(request, pageable),
+                jobApplicationModelAssembler);
         return ResponseEntity.ok(pagedModelReturn);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<JobApplication>> getJobApplication(@PathVariable Long id) {
-        Optional<JobApplication> application = jobApplicationService.getApplication(id);
-        return application.map(jobApplication -> ResponseEntity.ok(List.of(jobApplication)))
-                          .orElseGet(() -> ResponseEntity.ok(List.of()));
+    public ResponseEntity<JobApplicationModel> getJobApplication(@PathVariable Long id) {
+        JobApplication application = jobApplicationService.getApplication(id);
+        return ResponseEntity.ok(jobApplicationModelAssembler.toModel(application));
     }
 
     @PostMapping

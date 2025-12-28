@@ -1,5 +1,6 @@
 package com.appalanche.backend.application;
 
+import com.appalanche.backend.applications.business.hateoas.JobApplicationModel;
 import com.appalanche.backend.applications.business.request_response.AddApplicationRequest;
 import com.appalanche.backend.applications.business.request_response.ModifyApplicationRequest;
 import com.appalanche.backend.applications.persistence.ApplicationRepository;
@@ -1072,18 +1073,17 @@ class JobApplicationIntegrationTests {
         };
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertListOfReturnedApplications(MockHttpServletResponse response, List<JobApplication> expectedApplications, SecurityScenario scenario) throws IOException {
         switch (scenario) {
             case VALID_USER -> {
                 var rootNode = objectMapper.readTree(response.getContentAsString());
                 var applications = objectMapper.readValue(
-                        rootNode.get("_embedded").get("jobApplicationList").traverse(),
-                        new TypeReference<List<JobApplication>>() {
+                        rootNode.get("_embedded").get("jobApplicationModelList").traverse(),
+                        new TypeReference<List<JobApplicationModel>>() {
                         });
                 assertThat(applications)
                         .usingRecursiveComparison()
-                        .ignoringFields("id", "applicationId", "appliedDate", "responseDate", "createdAt")
+                        .ignoringFields("links", "id", "applicationId", "appliedDate", "responseDate", "createdAt")
                         .withEqualsForType((status1, status2) ->
                                         status1.getCode().equals(status2.getCode()),
                                 JobApplicationStatus.class)
@@ -1102,7 +1102,6 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertResponseContentForNewlyCreatedResourceURI(ResultActions result, SecurityScenario scenario) throws Exception {
         var response = result.andReturn().getResponse();
 
@@ -1124,7 +1123,6 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertApplicationDataUsingId(long applicationId, JobApplication old, JobApplication expected, SecurityScenario scenario) {
         var applicationInRepository = applicationRepository.findById(applicationId);
         if (applicationInRepository.isEmpty()) {
@@ -1169,7 +1167,6 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertMissingApplicationPresence(long applicationId, SecurityScenario scenario) {
         var applicationInRepository = applicationRepository.findById(applicationId);
 
@@ -1184,7 +1181,6 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertFailedValidationContent(
             MockHttpServletResponse response, String expectedContent, SecurityScenario scenario) throws Exception {
         switch (scenario) {
@@ -1198,7 +1194,6 @@ class JobApplicationIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertGenericEndpointResponse(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> fail("Implement the correct assertion!");

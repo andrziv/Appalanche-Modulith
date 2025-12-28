@@ -70,7 +70,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
   respectively.
 
 - **You require a valid `accessToken` JWT cookie to access:**
-    - `GET /application`, paged
+    - `GET /application`
         - Optional path search params:
             - search (`String`)
             - statusCodes (List of `String`)
@@ -91,15 +91,18 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Notes on request body fields:
             - The after/before dates are inclusive. An application with a responseDate of 2025-12-25T20:00:30Z will
               be caught by a "before" query at 2025-12-25.
+        - Returns (paged according to HATEOAS spec):
+            - jobApplicationModelList (List of `JobApplicationModel`, see `GET` endpoint below for the details of the
+              `JobApplicationModel` fields)
 
     - `GET /application/{id}`
         - Requires the following path field:
             - ID (`long`)
         - Returns:
-            - `200: OK`, with a return of the application data in the body:
+            - `200: OK`, with a return of the application data in the body (`JobApplicationModel`):
                 - id (`long`)
+                - applicationId (`UUID`)
                 - requisitionId (`String`)
-                - ownerEmail (`String`)
                 - title (`String`)
                 - company (`String`)
                 - interest (`integer`, between 1 and 10 inclusive)
@@ -115,9 +118,9 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                     - code (`String`)
                     - label (`String`)
                     - description (`String`)
+                - jobPostingLink (`URL`)
                 - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
                 - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
-                - createdAt (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
 
     - `POST /application`
         - Requires the following fields:
@@ -127,6 +130,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - interest (`integer`, must be between 1 and 10)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
+            - jobPostingLink (`URL`, HTTPS required)
             - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
             - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
@@ -145,6 +149,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - interest (`integer`, must be between 1 and 10)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
+            - jobPostingLink (`URL`, HTTPS required)
             - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
             - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
