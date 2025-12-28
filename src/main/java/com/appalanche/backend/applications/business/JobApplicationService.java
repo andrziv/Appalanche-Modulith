@@ -87,6 +87,7 @@ public class JobApplicationService {
                         request.interest(),
                         status,
                         experience,
+                        request.jobPostingLink(),
                         appliedDate,
                         responseDate);
 
@@ -137,6 +138,10 @@ public class JobApplicationService {
 
         if (request.interest() != null) {
             application.setInterest(request.interest());
+        }
+
+        if (request.jobPostingLink() != null) {
+            application.setJobPostingLink(request.jobPostingLink());
         }
 
         if (request.appliedDate() != null) {

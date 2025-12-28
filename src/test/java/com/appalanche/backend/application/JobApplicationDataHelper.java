@@ -72,6 +72,7 @@ public class JobApplicationDataHelper {
                 8,
                 status,
                 experience,
+                "https://localhost.com/test",
                 Instant.now(), Instant.now());
     }
 
@@ -85,6 +86,7 @@ public class JobApplicationDataHelper {
                 6,
                 status,
                 experience,
+                "https://localhost.com/test",
                 Instant.now(), Instant.now());
     }
 
@@ -98,6 +100,7 @@ public class JobApplicationDataHelper {
                 5,
                 status,
                 experience,
+                "https://localhost.com/test",
                 Instant.now(), Instant.now());
     }
 
@@ -111,6 +114,7 @@ public class JobApplicationDataHelper {
                 9,
                 status,
                 experience,
+                "https://localhost.com/test",
                 Instant.now(), Instant.now());
     }
 
@@ -124,6 +128,7 @@ public class JobApplicationDataHelper {
                 4,
                 status,
                 experience,
+                "https://localhost.com/test",
                 Instant.now(), Instant.now());
     }
 
@@ -154,6 +159,7 @@ public class JobApplicationDataHelper {
         private Integer interest;
         private JobApplicationStatus status;
         private JobApplicationExperience experience;
+        private String jobPostingLink;
         private Instant appliedDate;
         private Instant responseDate;
 
@@ -213,6 +219,11 @@ public class JobApplicationDataHelper {
             return this;
         }
 
+        JobApplicationBuilder withJobPostingLink(String jobPostingLink) {
+            this.jobPostingLink = jobPostingLink;
+            return this;
+        }
+
         JobApplicationBuilder withApplicationDate(Instant applicationDate) {
             this.appliedDate = applicationDate;
             return this;
@@ -225,7 +236,7 @@ public class JobApplicationDataHelper {
 
         JobApplication build() {
             return new JobApplication(applicationId, requisitionId, ownerId, title, company, interest, status,
-                    experience, appliedDate, responseDate);
+                    experience, jobPostingLink, appliedDate, responseDate);
         }
     }
 }

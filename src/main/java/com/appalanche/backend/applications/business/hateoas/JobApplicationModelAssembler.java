@@ -22,6 +22,7 @@ public class JobApplicationModelAssembler extends RepresentationModelAssemblerSu
                                         .withInterest(entity.getInterest())
                                         .withStatus(entity.getStatus())
                                         .withExperience(entity.getExperience())
+                                        .withJobPostingLink(entity.getJobPostingLink())
                                         .withAppliedDate(entity.getAppliedDate())
                                         .withResponseDate(entity.getResponseDate());
     }

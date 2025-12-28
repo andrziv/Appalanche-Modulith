@@ -16,9 +16,9 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
     private Integer interest;
     private JobApplicationStatus status;
     private JobApplicationExperience experience;
+    private String jobPostingLink;
     private Instant appliedDate;
     private Instant responseDate;
-    private Instant createdAt;
 
     public JobApplicationModel withId(Long id) {
         this.id = id;
@@ -60,6 +60,11 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
         return this;
     }
 
+    public JobApplicationModel withJobPostingLink(String jobPostingLink) {
+        this.jobPostingLink = jobPostingLink;
+        return this;
+    }
+
     public JobApplicationModel withAppliedDate(Instant appliedDate) {
         this.appliedDate = appliedDate;
         return this;
@@ -67,11 +72,6 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
 
     public JobApplicationModel withResponseDate(Instant responseDate) {
         this.responseDate = responseDate;
-        return this;
-    }
-
-    public JobApplicationModel withCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
         return this;
     }
 
@@ -107,15 +107,15 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
         return experience;
     }
 
+    public String getJobPostingLink() {
+        return jobPostingLink;
+    }
+
     public Instant getAppliedDate() {
         return appliedDate;
     }
 
     public Instant getResponseDate() {
         return responseDate;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
     }
 }

@@ -2,7 +2,9 @@ package com.appalanche.backend.applications.business.request_response;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Range;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.lang.NonNull;
 
 import java.time.Instant;
@@ -25,6 +27,10 @@ public record AddApplicationRequest(
 
         @NotBlank(message = "Experience level code cannot be blank")
         String experienceLevelCode,
+
+        @URL(protocol = "https", message = "URL must be a valid HTTPS link")
+        @Pattern(regexp = "[^<>\"\\s]*", message = "URL cannot contain spaces, quotes, or angle brackets (< >)")
+        String jobPostingLink,
 
         @PastOrPresent(message = "Application cannot be from the future")
         Instant appliedDate,
