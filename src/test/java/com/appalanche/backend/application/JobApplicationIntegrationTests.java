@@ -281,13 +281,41 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldFailGettingAllApplicationsWithInvalidTimezone(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var candidateDate1 = dateOffsetBy(1);
+        var candidateDate2 = dateOffsetBy(25);
+        var nonCandidateDate = dateOffsetBy(-48);
+        var formattedDate = LocalDate.ofInstant(candidateDate1, ZoneId.of("UTC"));
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate2).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(nonCandidateDate)
+                .build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withOwnerId(USER_ACCOUNT_ID_2)
+                .withApplicationDate(candidateDate1)
+                .build());
+
+        var appliedRangePath = "appliedAfter=" + formattedDate;
+        var timezonePath = "timezone=Tatooine/MosEisley";
+        var output = getAllApplications(appliedRangePath + '&' + timezonePath, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(badRequestHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
+        assertFailedValidationContent(response, "{\"timezone\":\"Invalid Timezone TZ identifier\"}", scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldGetAllApplicationsWithDesiredApplicationAndResponseRanges(SecurityScenario scenario) throws Exception {
         clearAllRepositories();
         var candidateDate1 = dateOffsetBy(1);
         var candidateDate2 = dateOffsetBy(25);
         var nonCandidateDate = dateOffsetBy(-48);
-        var formattedAfterDate = LocalDate.ofInstant(candidateDate1, ZoneId.of("UTC"));
-        var formattedBeforeDate = LocalDate.ofInstant(candidateDate2, ZoneId.of("UTC"));
+        var formattedAfterDate = LocalDate.ofInstant(candidateDate1, ZoneId.of("America/Toronto"));
+        var formattedBeforeDate = LocalDate.ofInstant(candidateDate2, ZoneId.of("America/Toronto"));
         var status = statusRepository.save(status1());
         var experience = experienceRepository.save(experience1());
         var candidate1 = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withApplicationDate(candidateDate1)
@@ -311,7 +339,8 @@ class JobApplicationIntegrationTests {
 
         var appliedRangePath = "appliedAfter=" + formattedAfterDate + '&' + "appliedBefore=" + formattedBeforeDate;
         var responseRangePath = "responseAfter=" + formattedAfterDate + '&' + "responseBefore=" + formattedBeforeDate;
-        var output = getAllApplications(appliedRangePath + '&' + responseRangePath, scenario);
+        var timezonePath = "timezone=America/Toronto";
+        var output = getAllApplications(appliedRangePath + '&' + responseRangePath + '&' + timezonePath, scenario);
 
         var response = output.andReturn().getResponse();
         output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,22 +53,22 @@ public class ApplicationSpecificationFactory {
             if (searchRequest.appliedAfter() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
                         root.get("appliedDate"),
-                        startOfDay(searchRequest.appliedAfter())));
+                        startOfDay(searchRequest.appliedAfter(), getZone(searchRequest.timezone()))));
             }
             if (searchRequest.appliedBefore() != null) {
                 predicates.add(criteriaBuilder.lessThan(
                         root.get("appliedDate"),
-                        startOfNextDay(searchRequest.appliedBefore())));
+                        startOfNextDay(searchRequest.appliedBefore(), getZone(searchRequest.timezone()))));
             }
             if (searchRequest.responseAfter() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(
                         root.get("responseDate"),
-                        startOfDay(searchRequest.responseAfter())));
+                        startOfDay(searchRequest.responseAfter(), getZone(searchRequest.timezone()))));
             }
             if (searchRequest.responseBefore() != null) {
                 predicates.add(criteriaBuilder.lessThan(
                         root.get("responseDate"),
-                        startOfNextDay(searchRequest.responseBefore())));
+                        startOfNextDay(searchRequest.responseBefore(), getZone(searchRequest.timezone()))));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -94,13 +94,23 @@ public class ApplicationSpecificationFactory {
         };
     }
 
-    private static Instant startOfDay(LocalDate date) {
-        var dayStart = date.atStartOfDay();
-        return dayStart.toInstant(ZoneOffset.UTC);
+    private static ZoneId getZone(String zone) {
+        // TODO: future smarter me, do I keep the try/catch even if I have the validator designed to protect against such
+        //  failing values on the offending input field?
+        try {
+            return (zone != null && !zone.isBlank()) ? ZoneId.of(zone) : ZoneId.of("UTC");
+        } catch (Exception e) {
+            return ZoneId.of("UTC");
+        }
     }
 
-    private static Instant startOfNextDay(LocalDate date) {
-        var nextDayStart = date.plusDays(1).atStartOfDay();
-        return nextDayStart.toInstant(ZoneOffset.UTC);
+    private static Instant startOfDay(LocalDate date, ZoneId zone) {
+        var dayStart = date.atStartOfDay(zone);
+        return dayStart.toInstant();
+    }
+
+    private static Instant startOfNextDay(LocalDate date, ZoneId zone) {
+        var nextDayStart = date.plusDays(1).atStartOfDay(zone);
+        return nextDayStart.toInstant();
     }
 }

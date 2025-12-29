@@ -1,5 +1,7 @@
 package com.appalanche.backend.applications.business.request_response;
 
+import com.appalanche.backend.applications.business.validation.ValidTimezone;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,5 +14,8 @@ public record SearchApplicationRequest(
         LocalDate appliedAfter,
         LocalDate appliedBefore,
         LocalDate responseAfter,
-        LocalDate responseBefore) {
+        LocalDate responseBefore,
+
+        @ValidTimezone
+        String timezone) {
 }

@@ -39,7 +39,7 @@ public class JobApplicationController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PagedModel<JobApplicationModel>> searchApplications(@ModelAttribute SearchApplicationRequest request,
+    public ResponseEntity<PagedModel<JobApplicationModel>> searchApplications(@Valid @ModelAttribute SearchApplicationRequest request,
                                                                               @PageableDefault(size = 20, sort = "createdAt", direction = DESC) Pageable pageable) {
         var pagedModelReturn = pagedResourcesAssembler.toModel(
                 jobApplicationService.searchApplications(request, pageable),
