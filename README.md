@@ -88,6 +88,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - appliedBefore (ISO 8601 `Date`, format: `yyyy-MM-dd`)
             - responseAfter (ISO 8601 `Date`, format: `yyyy-MM-dd`)
             - responseBefore (ISO 8601 `Date`, format: `yyyy-MM-dd`)
+            - timezone (`String`, TZ Identifier (e.g. `America/Toronto`))
         - Notes on request body fields:
             - The after/before dates are inclusive. An application with a responseDate of 2025-12-25T20:00:30Z will
               be caught by a "before" query at 2025-12-25.
@@ -127,7 +128,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - requisitionId (`String`)
             - title (`String`)
             - company (`String`)
-            - interest (`integer`, must be between 1 and 10)
+            - interest (`integer`, between 1 and 10 inclusive)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
             - jobPostingLink (`URL`, HTTPS required)
@@ -146,7 +147,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - requisitionId (`String`)
             - title (`String`)
             - company (`String`)
-            - interest (`integer`, must be between 1 and 10)
+            - interest (`integer`, between 1 and 10 inclusive)
             - statusCode (`String`)
             - experienceLevelCode (`String`)
             - jobPostingLink (`URL`, HTTPS required)
