@@ -162,6 +162,22 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Returns:
             - `204: NO CONTENT`
 
+### Company Logo Endpoints
+
+- **You require a valid `accessToken` JWT cookie to access:**
+    - `GET /logo/{brand}/{tld}`
+        - Requires the following path field:
+            - brand (`String`)
+            - tld (`String`)
+                - Note: TLD = Top Level Domain (e.g. `.com`, `.ca`, `.org`, `.net`, `.dev`, etc.)
+        - Returns:
+            - `image/jpeg`
+    - `GET /logo/{brand}`
+        - Requires the following path field:
+            - brand (`String`)
+        - Returns:
+            - `image/jpeg`
+
 ### Status Codes
 
 - `APPLIED`
