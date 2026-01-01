@@ -38,7 +38,7 @@ public class CompanyLogoService {
 
     @Transactional
     public CompanyLogo getCompanyLogo(String brand, String tld) {
-        logger.info("Received FetchLogoRequest[brand='{}', tld='{}'] at GetCompanyLogo service method.", brand, tld);
+        logger.debug("Received FetchLogoRequest[brand='{}', tld='{}'] at GetCompanyLogo service method.", brand, tld);
 
         var dbImage = logoRepository.findByBrandAndTopLevelDomain(brand, tld);
         if (dbImage.isEmpty()) {
@@ -55,7 +55,7 @@ public class CompanyLogoService {
 
     @Transactional
     public CompanyLogo getCompanyLogo(String brand) {
-        logger.info("Received FetchLogoRequest[brand='{}'] at GetCompanyLogo service method.", brand);
+        logger.debug("Received FetchLogoRequest[brand='{}'] at GetCompanyLogo service method.", brand);
 
         var dbImage = logoRepository.findByBrandAndTopLevelDomain(brand, "");
         if (dbImage.isEmpty()) {
