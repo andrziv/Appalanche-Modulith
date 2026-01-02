@@ -162,6 +162,27 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Returns:
             - `204: NO CONTENT`
 
+#### Static Application Data
+
+- **You require a valid `accessToken` JWT cookie to access:**
+    - `GET /application/static/statuses`
+        - Returns:
+            - `200: OK`, with a list of `Status` that each have the following fields:
+                - id (`long`)
+                - code (`String`)
+                - label (`String`)
+                - round (`integer`)
+                - colour (`String`, HEX code for a colour)
+                - textColour (`String`, HEX code for a colour)
+
+    - `GET /application/static/experiences`
+        - Returns:
+            - `200: OK`, with a list of `Experience` that each have the following fields:
+              - id (`long`)
+              - code (`String`)
+              - label (`String`)
+              - description (`String`)
+
 ### Company Logo Endpoints
 
 - **You require a valid `accessToken` JWT cookie to access:**
@@ -288,8 +309,6 @@ To run this project locally, you will need Java, Maven, and Docker installed.
       automatically provided if the opaque token is present.
         - This will make sessions last longer while also avoiding the downsides of JWTs not being able to be revoked...
     - OAUTH and SSO to be added too because I think implementation could be interesting
-3) Exposing the Status & Experience Data?
-    - A little extra work but having the data be "get-able" would allow for less hardcoding on the Frontend part
-4) Porting over to the latest and greatest
+3) Porting over to the latest and greatest
     - The new Spring framework versions have just recently come out and I think I'll wait for a few minor versions to go
       by before dipping myself into using them.
