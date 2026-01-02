@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
-@Table(name = "accountProfiles")
+@Table(name = "account_profiles")
 @Entity
 public class AccountProfile implements Serializable {
     @Id
@@ -15,17 +15,22 @@ public class AccountProfile implements Serializable {
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(unique = true, nullable = false, updatable = false)
+    @Column(unique = true, nullable = false, updatable = false, name = "account_id")
     private UUID accountId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "first_name")
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "last_name")
     private String lastName;
 
+    @Column(name = "linkedin_profile")
     private String linkedInProfile;
+
+    @Column(name = "github_profile")
     private String gitHubProfile;
+
+    @Column(name = "portfolio_site")
     private String portfolioSite;
 
     @CreationTimestamp

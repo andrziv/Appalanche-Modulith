@@ -4,8 +4,6 @@ import com.appalanche.backend.applications.persistence.JobApplicationExperienceR
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +13,6 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ApplicationStaticDataService {
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationStaticDataService.class);
-
     private final JobApplicationStatusRepository statusRepository;
     private final JobApplicationExperienceRepository experienceRepository;
 

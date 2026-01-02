@@ -15,7 +15,7 @@ public class JobApplication implements Serializable {
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(unique = true, nullable = false, updatable = false)
+    @Column(unique = true, nullable = false, updatable = false, name = "application_id")
     private UUID applicationId;
 
     @Column(nullable = false, name = "requisition_id")
@@ -41,7 +41,7 @@ public class JobApplication implements Serializable {
     @JoinColumn(name = "experience_id", nullable = false)
     private JobApplicationExperience experience;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "job_posting_link")
     private String jobPostingLink;
 
     @Column(name = "date_applied")

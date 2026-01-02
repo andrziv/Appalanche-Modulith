@@ -9,10 +9,10 @@ import java.io.Serializable;
 public class JobApplicationStatus implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, updatable = false)
     private String code;
 
     @Column(nullable = false)
@@ -21,7 +21,10 @@ public class JobApplicationStatus implements Serializable {
     @Column(nullable = false)
     private Integer round;
 
+    @Column(nullable = false)
     private String colour;
+
+    @Column(nullable = false, name = "text_colour")
     private String textColour;
 
     protected JobApplicationStatus() {

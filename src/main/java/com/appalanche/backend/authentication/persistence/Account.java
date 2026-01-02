@@ -18,7 +18,7 @@ public class Account implements UserDetails {
     @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(unique = true, nullable = false, updatable = false)
+    @Column(unique = true, nullable = false, updatable = false, name = "account_id")
     private UUID accountId;
 
     @Column(unique = true, length = 100, nullable = false)

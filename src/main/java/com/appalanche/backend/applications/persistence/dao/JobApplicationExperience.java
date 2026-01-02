@@ -9,10 +9,10 @@ import java.io.Serializable;
 public class JobApplicationExperience implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, updatable = false)
     private String code;
 
     @Column(nullable = false)
