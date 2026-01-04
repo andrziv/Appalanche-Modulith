@@ -178,10 +178,16 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
     - `GET /application/static/experiences`
         - Returns:
             - `200: OK`, with a list of `Experience` that each have the following fields:
-              - id (`long`)
-              - code (`String`)
-              - label (`String`)
-              - description (`String`)
+                - id (`long`)
+                - code (`String`)
+                - label (`String`)
+                - description (`String`)
+
+    - `GET /application/static/metadata/statuses`
+        - Returns:
+            - `200: OK`, with a list of `Status Metadata` that each have the following fields:
+                - codeFragment (`String`)
+                - maxRounds (`integer`)
 
 ### Company Logo Endpoints
 

@@ -1,5 +1,7 @@
 package com.appalanche.backend.applications.business;
 
+import com.appalanche.backend.applications.business.dto.StatusMetadata;
+import com.appalanche.backend.applications.config.JobApplicationStatusProperties;
 import com.appalanche.backend.applications.persistence.JobApplicationExperienceRepository;
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
@@ -15,11 +17,14 @@ import java.util.List;
 public class ApplicationStaticDataService {
     private final JobApplicationStatusRepository statusRepository;
     private final JobApplicationExperienceRepository experienceRepository;
+    private final JobApplicationStatusProperties statusProperties;
 
     public ApplicationStaticDataService(JobApplicationStatusRepository statusRepository,
-                                        JobApplicationExperienceRepository experienceRepository) {
+                                        JobApplicationExperienceRepository experienceRepository,
+                                        JobApplicationStatusProperties statusProperties) {
         this.statusRepository = statusRepository;
         this.experienceRepository = experienceRepository;
+        this.statusProperties = statusProperties;
     }
 
     public List<JobApplicationStatus> getAllStatuses() {
@@ -32,5 +37,14 @@ public class ApplicationStaticDataService {
         List<JobApplicationExperience> list = new ArrayList<>();
         experienceRepository.findAll().forEach(list::add);
         return list;
+    }
+
+    public List<StatusMetadata> getStatusMetadata() {
+        List<StatusMetadata> metadata = new ArrayList<>();
+        for (JobApplicationStatusProperties.StatusConfig config : statusProperties.getStatuses()) {
+            metadata.add(new StatusMetadata(config.getCode().replace("_{0}", ""), config.getMaxRounds()));
+        }
+
+        return metadata;
     }
 }

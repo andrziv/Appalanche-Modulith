@@ -1,6 +1,7 @@
 package com.appalanche.backend.applications.endpoint;
 
 import com.appalanche.backend.applications.business.ApplicationStaticDataService;
+import com.appalanche.backend.applications.business.dto.StatusMetadata;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,14 @@ public class ApplicationStaticDataController {
         return ResponseEntity.ok()
                              .cacheControl(maxAge(24, HOURS))
                              .body(staticDataService.getAllStatuses());
+    }
+
+    @GetMapping("/metadata/statuses")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<StatusMetadata>> getStatusMetadata() {
+        return ResponseEntity.ok()
+                             .cacheControl(maxAge(24, HOURS))
+                             .body(staticDataService.getStatusMetadata());
     }
 
     @GetMapping("/experiences")
