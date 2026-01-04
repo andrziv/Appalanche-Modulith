@@ -37,6 +37,10 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - email (`String`)
             - fullName (`String`)
 
+- `POST /authenticate/logout`, **requires a valid `accessToken` JWT cookie to access**
+    - Returns:
+        - `200: OK`, Returns a dead/outdated JWT as a Strict httpOnly cookie called "accessToken".
+
 ### Profile Endpoints
 
 - **You require a valid `accessToken` JWT cookie to access:**

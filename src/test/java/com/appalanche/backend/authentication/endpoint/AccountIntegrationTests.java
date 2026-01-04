@@ -195,6 +195,21 @@ public class AccountIntegrationTests {
         assertAuthenticationResponse(response, scenario);
     }
 
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldLogoutSuccessfullyWithValidToken(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL);
+        var accountId = createdAccount.get().getAccountId();
+
+        var output = logout(accountId, scenario);
+        var response = output.andReturn().getResponse();
+
+        output.andExpect(expectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectedStatusCodeFor(scenario));
+        assertLogoutResponse(response, scenario);
+    }
+
     @NotNull
     private ResultActions registerAccount(String email, String password, SecurityScenario scenario) throws Exception {
         SignupRequest signupData = new SignupRequest(USER_FIRST_NAME, USER_LAST_NAME, email, password);
@@ -245,6 +260,20 @@ public class AccountIntegrationTests {
         return mockMvc.perform(request);
     }
 
+    @NotNull
+    private ResultActions logout(UUID accountId, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+
+        var request = post("/authenticate/logout").contentType(MediaType.APPLICATION_JSON);
+
+        if (cookie != null) {
+            request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
     private static ResultMatcher expectedHttpStatusMatcherFor(SecurityScenario scenario) {
         return switch (scenario) {
             case VALID_USER -> status().isOk();
@@ -267,7 +296,6 @@ public class AccountIntegrationTests {
         };
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertAuthenticationResponse(MockHttpServletResponse response, SecurityScenario scenario) throws Exception {
         switch (scenario) {
             case VALID_USER -> {
@@ -287,7 +315,22 @@ public class AccountIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void assertLogoutResponse(MockHttpServletResponse response, SecurityScenario scenario) throws Exception {
+        switch (scenario) {
+            case VALID_USER -> {
+                var cookie = response.getCookie("accessToken");
+                assertThat(cookie).isNotNull();
+                assertThat(cookie.getMaxAge()).isEqualTo(0);
+            }
+            case MALFORMED_TOKEN,
+                 EXPIRED_TOKEN,
+                 MODIFIED_TOKEN,
+                 FAKE_TOKEN,
+                 NO_TOKEN -> assertGenericEndpointResponse(response, scenario);
+            default -> fail("Implement the case for " + scenario + "!");
+        }
+    }
+
     private void assertGenericEndpointResponse(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> fail("Implement the correct assertion!");

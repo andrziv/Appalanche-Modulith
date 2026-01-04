@@ -67,4 +67,29 @@ public class AccountAuthController {
         var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail());
         return ResponseEntity.ok(responseContent);
     }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> invalidateToken(HttpServletResponse response) {
+        Optional<Account> tokenAccount = accountService.getCurrentUser();
+
+        if (tokenAccount.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var authenticatedAccount = tokenAccount.get();
+        String jwtToken = jwtDelegate.generateToken(authenticatedAccount);
+
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", jwtToken)
+                                                 .httpOnly(true)
+                                                 .secure(false) // TODO: add some sort of nuance to this flag so it's properly required in non-dev enviros
+                                                 .path("/")
+                                                 .maxAge(0)
+                                                 .sameSite("Strict")
+                                                 .build();
+
+        response.addHeader(SET_COOKIE, jwtCookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
 }
