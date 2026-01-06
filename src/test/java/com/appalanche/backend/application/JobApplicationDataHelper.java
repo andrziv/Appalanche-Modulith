@@ -73,6 +73,7 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 "https://localhost.com/test",
+                "description User1 Application 1",
                 Instant.now(), Instant.now());
     }
 
@@ -87,6 +88,7 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 "https://localhost.com/test",
+                "description User1 Application 2",
                 Instant.now(), Instant.now());
     }
 
@@ -101,6 +103,7 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 "https://localhost.com/test",
+                "description User1 Application 3",
                 Instant.now(), Instant.now());
     }
 
@@ -115,6 +118,7 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 "https://localhost.com/test",
+                "description User2 Application 1",
                 Instant.now(), Instant.now());
     }
 
@@ -129,6 +133,7 @@ public class JobApplicationDataHelper {
                 status,
                 experience,
                 "https://localhost.com/test",
+                "description User2 Application 2",
                 Instant.now(), Instant.now());
     }
 
@@ -150,6 +155,23 @@ public class JobApplicationDataHelper {
                                                                      .withResponseDate(responseDate);
     }
 
+    static JobApplicationBuilder builder(JobApplication application) {
+        var builder = new JobApplicationBuilder();
+        builder.withApplicationId(application.getApplicationId());
+        builder.withRequisitionId(application.getRequisitionId());
+        builder.withOwnerId(application.getOwnerAccountId());
+        builder.withTitle(application.getTitle());
+        builder.withCompany(application.getCompany());
+        builder.withInterest(application.getInterest());
+        builder.withStatus(application.getStatus());
+        builder.withExperience(application.getExperience());
+        builder.withJobPostingLink(application.getJobPostingLink());
+        builder.withDescription(application.getDescription());
+        builder.withApplicationDate(application.getAppliedDate());
+        builder.withResponseDate(application.getResponseDate());
+        return builder;
+    }
+
     static class JobApplicationBuilder {
         private UUID applicationId;
         private String requisitionId;
@@ -160,23 +182,11 @@ public class JobApplicationDataHelper {
         private JobApplicationStatus status;
         private JobApplicationExperience experience;
         private String jobPostingLink;
+        private String description;
         private Instant appliedDate;
         private Instant responseDate;
 
         JobApplicationBuilder() {
-        }
-
-        JobApplicationBuilder(JobApplication application) {
-            this.applicationId = application.getApplicationId();
-            this.requisitionId = application.getRequisitionId();
-            this.ownerId = application.getOwnerAccountId();
-            this.title = application.getTitle();
-            this.company = application.getCompany();
-            this.interest = application.getInterest();
-            this.status = application.getStatus();
-            this.experience = application.getExperience();
-            this.appliedDate = application.getAppliedDate();
-            this.responseDate = application.getResponseDate();
         }
 
         JobApplicationBuilder withApplicationId(UUID applicationId) {
@@ -224,6 +234,11 @@ public class JobApplicationDataHelper {
             return this;
         }
 
+        JobApplicationBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
         JobApplicationBuilder withApplicationDate(Instant applicationDate) {
             this.appliedDate = applicationDate;
             return this;
@@ -236,7 +251,7 @@ public class JobApplicationDataHelper {
 
         JobApplication build() {
             return new JobApplication(applicationId, requisitionId, ownerId, title, company, interest, status,
-                    experience, jobPostingLink, appliedDate, responseDate);
+                    experience, jobPostingLink, description, appliedDate, responseDate);
         }
     }
 }

@@ -44,6 +44,9 @@ public class JobApplication implements Serializable {
     @Column(columnDefinition = "TEXT", name = "job_posting_link")
     private String jobPostingLink;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "date_applied")
     private Instant appliedDate;
 
@@ -59,7 +62,7 @@ public class JobApplication implements Serializable {
 
     public JobApplication(UUID applicationId, String requisitionId, UUID ownerAccountId, String title, String company,
                           Integer interest, JobApplicationStatus status, JobApplicationExperience experience,
-                          String jobPostingLink, Instant appliedDate, Instant responseDate) {
+                          String jobPostingLink, String description, Instant appliedDate, Instant responseDate) {
         this.applicationId = applicationId;
         this.requisitionId = requisitionId;
         this.ownerAccountId = ownerAccountId;
@@ -69,6 +72,7 @@ public class JobApplication implements Serializable {
         this.status = status;
         this.experience = experience;
         this.jobPostingLink = jobPostingLink;
+        this.description = description;
         this.appliedDate = appliedDate;
         this.responseDate = responseDate;
     }
@@ -154,6 +158,14 @@ public class JobApplication implements Serializable {
 
     public void setJobPostingLink(String jobPostingLink) {
         this.jobPostingLink = jobPostingLink;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Instant getAppliedDate() {

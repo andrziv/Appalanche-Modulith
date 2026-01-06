@@ -2,6 +2,7 @@ package com.appalanche.backend.applications.business.request_response;
 
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.lang.NonNull;
@@ -22,6 +23,9 @@ public record ModifyApplicationRequest(
         @URL(protocol = "https", message = "URL must be a valid HTTPS link")
         @Pattern(regexp = "[^<>\"\\s]*", message = "URL cannot contain spaces, quotes, or angle brackets (< >)")
         String jobPostingLink,
+
+        @Size(max = 15000, message = "Description cannot exceed 15,000 characters")
+        String description,
 
         @PastOrPresent(message = "Application cannot be from the future")
         Instant appliedDate,
