@@ -1,7 +1,7 @@
 package com.appalanche.backend.applications.endpoint;
 
 import com.appalanche.backend.applications.business.ApplicationStaticDataService;
-import com.appalanche.backend.applications.business.dto.StatusMetadata;
+import com.appalanche.backend.applications.business.request_response.StatusMetadata;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
 import org.springframework.http.ResponseEntity;

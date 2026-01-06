@@ -1,6 +1,6 @@
 package com.appalanche.backend.applications.business;
 
-import com.appalanche.backend.applications.business.dto.StatusMetadata;
+import com.appalanche.backend.applications.business.request_response.StatusMetadata;
 import com.appalanche.backend.applications.config.JobApplicationStatusProperties;
 import com.appalanche.backend.applications.persistence.JobApplicationExperienceRepository;
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;

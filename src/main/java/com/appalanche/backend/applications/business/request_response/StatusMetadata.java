@@ -1,4 +1,4 @@
-package com.appalanche.backend.applications.business.dto;
+package com.appalanche.backend.applications.business.request_response;
 
 public record StatusMetadata(
         String codeFragment,
