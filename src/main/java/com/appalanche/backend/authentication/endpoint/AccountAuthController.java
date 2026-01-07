@@ -96,8 +96,8 @@ public class AccountAuthController {
         var incomingRefreshCookie = getCookie(request, "refreshToken");
 
         String refreshToken = null;
-        if (incomingRefreshCookie != null
-                && (incomingRefreshCookie.getValue() == null || incomingRefreshCookie.getValue().isBlank())) {
+        if (incomingRefreshCookie != null && incomingRefreshCookie.getValue() != null
+                && !incomingRefreshCookie.getValue().isBlank()) {
             refreshToken = incomingRefreshCookie.getValue();
         }
 

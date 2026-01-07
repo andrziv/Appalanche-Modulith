@@ -81,9 +81,7 @@ public class AccountService {
 
         tokenRepository.save(refreshToken);
 
-        String jwt = jwtDelegate.generateToken(
-                Map.of("email", refreshToken.getAccount().getEmail()),
-                refreshToken.getAccount());
+        String jwt = jwtDelegate.generateToken(Map.of("email", account.getEmail()), account);
 
         return new AccountTokenBundle(account, jwt, refreshToken.getToken());
     }
