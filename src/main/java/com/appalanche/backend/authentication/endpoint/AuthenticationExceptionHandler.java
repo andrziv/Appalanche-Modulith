@@ -1,6 +1,7 @@
 package com.appalanche.backend.authentication.endpoint;
 
 import com.appalanche.backend.authentication.business.exceptions.DuplicationException;
+import com.appalanche.backend.authentication.business.exceptions.TokenRefreshException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,6 +28,13 @@ public class AuthenticationExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "Invalid email or password"));
+    }
+
+    @ExceptionHandler(TokenRefreshException.class)
+    public ResponseEntity<Map<String, String>> handleTokenRefreshError(TokenRefreshException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
