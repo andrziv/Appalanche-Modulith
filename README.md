@@ -26,8 +26,12 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - email (`String`)
         - password (`String`)
     - Returns:
-        - `200: OK`, Returns the JWT needed for other endpoint access as a Strict httpOnly cookie called "accessToken".
-            - Also returns content with the following info:
+        - `200: OK`
+            - Important cookies (`Strict`, `HttpOnly`):
+                - `accessToken`, short-lived JWT for accessing important endpoints
+                - `refreshToken`, opaque token for refreshing the `accessToken` when calling
+                  `POST /authenticate/refresh`
+            - Content with the following info:
                 - accountId (`UUID`)
                 - email (`String`)
 
@@ -36,6 +40,10 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - `200: OK`, Returns content with the following info related to the account attached to the JWT:
             - email (`String`)
             - fullName (`String`)
+
+- `POST /authenticate/refresh`,
+    - Returns:
+        - `200: OK`, Returns a refreshed JWT as a Strict httpOnly cookie called "accessToken".
 
 - `POST /authenticate/logout`, **requires a valid `accessToken` JWT cookie to access**
     - Returns:
@@ -320,9 +328,6 @@ To run this project locally, you will need Java, Maven, and Docker installed.
         - Crawling the web to look for available jobs and recommend certain ones to users
         - Crawling a provided link to automatically fill other fields in
 2) Security
-    - Currently only JWTs are in-play, but I'd like to add a stored opaque token that allows for JWTs to be
-      automatically provided if the opaque token is present.
-        - This will make sessions last longer while also avoiding the downsides of JWTs not being able to be revoked...
     - OAUTH and SSO to be added too because I think implementation could be interesting
 3) Porting over to the latest and greatest
     - The new Spring framework versions have just recently come out and I think I'll wait for a few minor versions to go
