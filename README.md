@@ -31,19 +31,26 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                 - `accessToken`, short-lived JWT for accessing important endpoints
                 - `refreshToken`, opaque token for refreshing the `accessToken` when calling
                   `POST /authenticate/refresh`
-            - Content with the following info:
+            - Body Content with the following info:
                 - accountId (`UUID`)
                 - email (`String`)
+                - accessExpiryMilliseconds (`long`)
 
 - `GET /authenticate`, **requires a valid `accessToken` JWT cookie to access**
     - Returns:
         - `200: OK`, Returns content with the following info related to the account attached to the JWT:
-            - email (`String`)
-            - fullName (`String`)
+            - Body Content:
+              - accountId (`UUID`)
+              - email (`String`)
+              - accessExpiryMilliseconds (`long`)
 
 - `POST /authenticate/refresh`,
     - Returns:
         - `200: OK`, Returns a refreshed JWT as a Strict httpOnly cookie called "accessToken".
+            - Body Content:
+                - accountId (`UUID`)
+                - email (`String`)
+                - accessExpiryMilliseconds (`long`)
 
 - `POST /authenticate/logout`, **requires a valid `accessToken` JWT cookie to access**
     - Returns:

@@ -43,7 +43,7 @@ public class AccountAuthController {
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
         var authenticatedAccount = bundle.account();
-        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail());
+        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -60,12 +60,12 @@ public class AccountAuthController {
         }
 
         var authenticatedAccount = tokenAccount.get();
-        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail());
+        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
         return ResponseEntity.ok(responseContent);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request) {
+    public ResponseEntity<LoginResponse> refresh(HttpServletRequest request) {
         var incomingRefreshCookie = getCookie(request, "refreshToken");
 
         if (incomingRefreshCookie == null) {
@@ -84,10 +84,11 @@ public class AccountAuthController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
+        var responseContent = new LoginResponse(bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
-                             .build();
+                             .body(responseContent);
     }
 
     @PostMapping("/logout")
