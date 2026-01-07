@@ -143,10 +143,9 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
 
     - `GET /application/{id}`
         - Requires the following path field:
-            - ID (`long`)
+            - ID (`UUID`)
         - Returns:
             - `200: OK`, with a return of the application data in the body (`JobApplicationModel`):
-                - id (`long`)
                 - applicationId (`UUID`)
                 - requisitionId (`String`)
                 - title (`String`)
@@ -184,12 +183,12 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Returns:
             - `201: CREATED` with...
                 - a return of the newly created application ID in the body:
-                    - id (`long`)
+                    - applicationId (`UUID`)
                 - the URI in the `Location` header
 
     - `PATCH /application/{id}`
         - Requires the following path field:
-            - ID (`long`)
+            - ID (`UUID`)
         - Optional request body fields:
             - requisitionId (`String`)
             - title (`String`)
@@ -206,7 +205,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
 
     - `DELETE /application/{id}`
         - Requires the following path field:
-            - ID (`long`)
+            - ID (`UUID`)
         - Returns:
             - `204: NO CONTENT`
 

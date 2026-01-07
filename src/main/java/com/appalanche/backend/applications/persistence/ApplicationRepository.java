@@ -10,5 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface ApplicationRepository extends ListCrudRepository<JobApplication, Long>, JpaSpecificationExecutor<JobApplication> {
-    Optional<JobApplication> findByIdAndOwnerAccountId(long id, UUID ownerAccountId);
+    Optional<JobApplication> findByApplicationId(UUID applicationId);
+
+    Optional<JobApplication> findByApplicationIdAndOwnerAccountId(UUID applicationId, UUID ownerAccountId);
 }

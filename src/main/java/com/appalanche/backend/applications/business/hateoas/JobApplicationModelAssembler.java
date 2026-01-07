@@ -15,8 +15,7 @@ public class JobApplicationModelAssembler extends RepresentationModelAssemblerSu
     @NonNull
     @Override
     public JobApplicationModel toModel(JobApplication entity) {
-        return new JobApplicationModel().withId(entity.getId())
-                                        .withApplicationId(entity.getApplicationId())
+        return new JobApplicationModel().withApplicationId(entity.getApplicationId())
                                         .withRequisitionId(entity.getRequisitionId())
                                         .withTitle(entity.getTitle())
                                         .withCompany(entity.getCompany())

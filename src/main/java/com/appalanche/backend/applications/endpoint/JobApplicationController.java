@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
@@ -49,7 +50,7 @@ public class JobApplicationController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<JobApplicationModel> getJobApplication(@PathVariable Long id) {
+    public ResponseEntity<JobApplicationModel> getJobApplication(@PathVariable UUID id) {
         JobApplication application = jobApplicationService.getApplication(id);
         return ResponseEntity.ok(jobApplicationModelAssembler.toModelWithDescription(application));
     }
@@ -59,22 +60,22 @@ public class JobApplicationController {
     public ResponseEntity<AddApplicationResponse> addApplication(@Valid @RequestBody AddApplicationRequest request) {
         var result = jobApplicationService.addApplication(request);
 
-        AddApplicationResponse response = new AddApplicationResponse(result.getId());
-        URI location = fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
+        AddApplicationResponse response = new AddApplicationResponse(result.getApplicationId());
+        URI location = fromCurrentRequest().path("/{id}").buildAndExpand(response.applicationId()).toUri();
 
         return ResponseEntity.created(location).body(response);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> modifyApplication(@PathVariable Long id, @Valid @RequestBody ModifyApplicationRequest request) {
+    public ResponseEntity<Void> modifyApplication(@PathVariable UUID id, @Valid @RequestBody ModifyApplicationRequest request) {
         jobApplicationService.modifyApplication(id, request);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> removeApplication(@PathVariable Long id) {
+    public ResponseEntity<Void> removeApplication(@PathVariable UUID id) {
         jobApplicationService.removeApplication(id);
         return ResponseEntity.noContent().build();
     }

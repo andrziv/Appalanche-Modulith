@@ -40,8 +40,8 @@ public class JobApplicationService {
         this.sanitizer = sanitizer;
     }
 
-    public JobApplication getApplication(long id) {
-        return applicationRepository.findByIdAndOwnerAccountId(id, getCurrentAccountId())
+    public JobApplication getApplication(UUID id) {
+        return applicationRepository.findByApplicationIdAndOwnerAccountId(id, getCurrentAccountId())
                                     .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
     }
 
@@ -104,12 +104,12 @@ public class JobApplicationService {
     }
 
     @Transactional
-    public void modifyApplication(Long applicationId, ModifyApplicationRequest request) {
+    public void modifyApplication(UUID applicationId, ModifyApplicationRequest request) {
         logger.info("Received {} to ModifyApplication service method.", request);
 
         UUID currentAccountId = getCurrentAccountId();
 
-        var application = applicationRepository.findByIdAndOwnerAccountId(applicationId, currentAccountId)
+        var application = applicationRepository.findByApplicationIdAndOwnerAccountId(applicationId, currentAccountId)
                                                .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         if (request.statusCode() != null) {
@@ -172,12 +172,12 @@ public class JobApplicationService {
     }
 
     @Transactional
-    public void removeApplication(Long applicationId) {
+    public void removeApplication(UUID applicationId) {
         logger.info("Received DeletionRequest[id='{}'] at RemoveApplication service method.", applicationId);
 
         UUID currentAccountId = getCurrentAccountId();
 
-        JobApplication application = applicationRepository.findByIdAndOwnerAccountId(applicationId, currentAccountId)
+        JobApplication application = applicationRepository.findByApplicationIdAndOwnerAccountId(applicationId, currentAccountId)
                                                           .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         applicationRepository.delete(application);

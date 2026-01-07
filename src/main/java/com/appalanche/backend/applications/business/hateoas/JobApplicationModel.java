@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 public class JobApplicationModel extends RepresentationModel<JobApplicationModel> {
-    private Long id;
     private UUID applicationId;
     private String requisitionId;
     private String title;
@@ -20,11 +19,6 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
     private String description;
     private Instant appliedDate;
     private Instant responseDate;
-
-    public JobApplicationModel withId(Long id) {
-        this.id = id;
-        return this;
-    }
 
     public JobApplicationModel withApplicationId(UUID applicationId) {
         this.applicationId = applicationId;
@@ -79,10 +73,6 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
     public JobApplicationModel withResponseDate(Instant responseDate) {
         this.responseDate = responseDate;
         return this;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public UUID getApplicationId() {
