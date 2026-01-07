@@ -118,14 +118,16 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountTokenBundle logout(String token) {
+    public AccountTokenBundle logout(String refreshToken) {
         Optional<Account> tokenAccount = getCurrentUser();
 
         if (tokenAccount.isEmpty()) {
             return null;
         }
 
-        tokenRepository.findByToken(token).ifPresent(tokenRepository::delete);
+        if (refreshToken != null) {
+            tokenRepository.findByToken(refreshToken).ifPresent(tokenRepository::delete);
+        }
 
         var account = tokenAccount.get();
         return new AccountTokenBundle(account, jwtDelegate.generateToken(account), null);

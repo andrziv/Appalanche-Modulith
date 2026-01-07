@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
@@ -94,7 +93,14 @@ public class AccountAuthController {
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> invalidateSession(HttpServletRequest request) {
-        String refreshToken = Objects.requireNonNull(getCookie(request, "refreshToken")).getValue();
+        var incomingRefreshCookie = getCookie(request, "refreshToken");
+
+        String refreshToken = null;
+        if (incomingRefreshCookie != null
+                && (incomingRefreshCookie.getValue() == null || incomingRefreshCookie.getValue().isBlank())) {
+            refreshToken = incomingRefreshCookie.getValue();
+        }
+
         var bundle = accountService.logout(refreshToken);
 
         if (bundle == null) {
