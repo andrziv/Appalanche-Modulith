@@ -59,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-public class AccountIntegrationTests {
+public class AccountAuthenticationIntegrationTests {
     private final static String USER_AGENT_HEADER = "Test-Runner 9.99.9";
     private final static UUID USER_ACCOUNT_ID = randomUUID();
     private final static String USER_FIRST_NAME = "Test";

@@ -16,15 +16,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import static com.appalanche.backend.authentication.endpoint.CookieHelper.createJwtCookie;
+import static com.appalanche.backend.authentication.endpoint.CookieHelper.createRefreshCookie;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.web.util.WebUtils.getCookie;
 
 @RequestMapping("/authenticate")
 @RestController
-public class AccountAuthController {
+public class AccountAuthenticationController {
     private final AccountService accountService;
 
-    public AccountAuthController(AccountService accountService) {
+    public AccountAuthenticationController(AccountService accountService) {
         this.accountService = accountService;
     }
 
@@ -43,7 +45,8 @@ public class AccountAuthController {
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
         var authenticatedAccount = bundle.account();
-        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = new LoginResponse(
+                authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -84,7 +87,8 @@ public class AccountAuthController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
-        var responseContent = new LoginResponse(bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = new LoginResponse(
+                bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -104,31 +108,8 @@ public class AccountAuthController {
 
         var bundle = accountService.logout(refreshToken);
 
-        if (bundle == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), 0);
 
         return ResponseEntity.ok().header(SET_COOKIE, jwtCookie.toString()).build();
-    }
-
-    private ResponseCookie createJwtCookie(String jwt, long age) {
-        return ResponseCookie.from("accessToken", jwt)
-                             .httpOnly(true)
-                             .secure(false) // TODO: add some sort of nuance to this flag so it's properly required in non-dev enviros
-                             .path("/")
-                             .maxAge(age)
-                             .sameSite("Strict")
-                             .build();
-    }
-
-    private ResponseCookie createRefreshCookie(String refreshToken) {
-        return ResponseCookie.from("refreshToken", refreshToken)
-                             .httpOnly(true)
-                             .secure(false) // TODO: add some sort of nuance to this flag so it's properly required in non-dev enviros
-                             .path("/authenticate/refresh")
-                             .sameSite("Strict")
-                             .build();
     }
 }

@@ -13,13 +13,18 @@ import com.appalanche.backend.security.helper.JwtHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -76,14 +81,11 @@ public class AccountService {
 
         enforceSessionLimit(account.getAccountId(), deviceName);
 
-        RefreshToken refreshToken = new RefreshToken(account, randomUUID(), randomUUID().toString(), deviceName,
-                now().plus(refreshTokenLifetime, DAYS), now());
+        var refreshToken = generateRefreshToken(account, deviceName);
+        var savedToken = tokenRepository.save(refreshToken);
+        var jwt = jwtDelegate.generateToken(account);
 
-        tokenRepository.save(refreshToken);
-
-        String jwt = jwtDelegate.generateToken(Map.of("email", account.getEmail()), account);
-
-        return new AccountTokenBundle(account, jwt, refreshToken.getToken());
+        return new AccountTokenBundle(account, jwt, savedToken.getToken());
     }
 
     @Transactional
@@ -108,27 +110,71 @@ public class AccountService {
         refreshToken.setLastUsed(now());
 
         RefreshToken savedToken = tokenRepository.save(refreshToken);
-        String jwt = jwtDelegate.generateToken(
-                Map.of("email", refreshToken.getAccount().getEmail()),
-                refreshToken.getAccount());
+        String jwt = jwtDelegate.generateToken(refreshToken.getAccount());
 
         return new AccountTokenBundle(account, jwt, savedToken.getToken());
     }
 
     @Transactional
     public AccountTokenBundle logout(String refreshToken) {
-        Optional<Account> tokenAccount = getCurrentUser();
-
-        if (tokenAccount.isEmpty()) {
-            return null;
-        }
+        var account = getCurrentUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (refreshToken != null) {
             tokenRepository.findByToken(refreshToken).ifPresent(tokenRepository::delete);
         }
 
-        var account = tokenAccount.get();
         return new AccountTokenBundle(account, jwtDelegate.generateToken(account), null);
+    }
+
+    @Transactional
+    public AccountTokenBundle changePassword(String oldPassword, String newPassword, String deviceName) {
+        var account = getCurrentUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
+            throw new BadCredentialsException("Current password does not match");
+        }
+
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+
+        var tokensToDelete = tokenRepository.findAllByAccount_AccountIdOrderByLastUsedAsc(account.getAccountId());
+        for (RefreshToken token : tokensToDelete) {
+            tokenRepository.delete(token);
+        }
+
+        var refreshToken = generateRefreshToken(account, deviceName);
+        var savedToken = tokenRepository.save(refreshToken);
+        var jwt = jwtDelegate.generateToken(account);
+
+        return new AccountTokenBundle(account, jwt, savedToken.getToken());
+    }
+
+    @Transactional
+    public AccountTokenBundle changeEmail(String currentPassword, String newEmail, String deviceName) {
+        var account = getCurrentUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, account.getPassword())) {
+            throw new BadCredentialsException("Password incorrect");
+        }
+
+        Optional<Account> existingAccount = accountRepository.findByEmail(newEmail);
+        if (existingAccount.isPresent()) {
+            throw new DuplicationException(String.format("User with the email address '%s' already exists", newEmail));
+        }
+
+        account.setEmail(newEmail);
+        accountRepository.save(account);
+
+        var tokensToDelete = tokenRepository.findAllByAccount_AccountIdOrderByLastUsedAsc(account.getAccountId());
+        for (RefreshToken token : tokensToDelete) {
+            tokenRepository.delete(token);
+        }
+
+        var refreshToken = generateRefreshToken(account, deviceName);
+        var savedToken = tokenRepository.save(refreshToken);
+        var jwt = jwtDelegate.generateToken(account);
+
+        return new AccountTokenBundle(account, jwt, savedToken.getToken());
     }
 
     public Optional<Account> getCurrentUser() {
@@ -157,6 +203,10 @@ public class AccountService {
                 tokenRepository.delete(sessions.get(i));
             }
         }
+    }
+
+    private RefreshToken generateRefreshToken(Account account, String deviceName) {
+        return new RefreshToken(account, randomUUID(), randomUUID().toString(), deviceName, now().plus(refreshTokenLifetime, DAYS), now());
     }
 
     public record AccountTokenBundle(
