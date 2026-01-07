@@ -1,6 +1,6 @@
 package com.appalanche.backend.security.helper;
 
-import com.appalanche.backend.authentication.persistence.Account;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;

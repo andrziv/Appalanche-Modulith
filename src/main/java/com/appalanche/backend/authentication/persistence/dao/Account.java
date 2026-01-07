@@ -1,4 +1,4 @@
-package com.appalanche.backend.authentication.persistence;
+package com.appalanche.backend.authentication.persistence.dao;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

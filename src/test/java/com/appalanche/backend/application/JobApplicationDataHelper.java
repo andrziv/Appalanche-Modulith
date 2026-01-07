@@ -3,7 +3,7 @@ package com.appalanche.backend.application;
 import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
-import com.appalanche.backend.authentication.persistence.Account;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 
 import java.time.Instant;
 import java.util.UUID;

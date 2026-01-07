@@ -2,8 +2,8 @@ package com.appalanche.backend.profiles;
 
 import com.appalanche.backend.authentication.business.events.AccountCreationEvent;
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
-import com.appalanche.backend.authentication.persistence.Account;
 import com.appalanche.backend.authentication.persistence.AccountRepository;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import com.appalanche.backend.profiles.business.request_response.ModifyAccountProfileRequest;
 import com.appalanche.backend.profiles.persistence.AccountProfile;
 import com.appalanche.backend.profiles.persistence.AccountProfileRepository;

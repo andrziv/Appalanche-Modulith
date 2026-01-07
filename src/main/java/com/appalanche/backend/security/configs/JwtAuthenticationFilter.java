@@ -1,6 +1,6 @@
 package com.appalanche.backend.security.configs;
 
-import com.appalanche.backend.authentication.persistence.Account;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import com.appalanche.backend.security.helper.JwtHelper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

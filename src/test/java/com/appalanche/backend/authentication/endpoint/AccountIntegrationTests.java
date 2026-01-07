@@ -2,8 +2,8 @@ package com.appalanche.backend.authentication.endpoint;
 
 import com.appalanche.backend.authentication.business.request_response.LoginRequest;
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
-import com.appalanche.backend.authentication.persistence.Account;
 import com.appalanche.backend.authentication.persistence.AccountRepository;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import com.appalanche.backend.security.helper.JwtHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

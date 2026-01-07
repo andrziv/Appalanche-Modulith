@@ -1,5 +1,6 @@
 package com.appalanche.backend.authentication.persistence;
 
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
