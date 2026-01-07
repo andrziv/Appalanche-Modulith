@@ -5,11 +5,13 @@ import com.appalanche.backend.authentication.business.request_response.SignupReq
 import com.appalanche.backend.authentication.persistence.AccountRepository;
 import com.appalanche.backend.authentication.persistence.RefreshTokenRepository;
 import com.appalanche.backend.authentication.persistence.dao.Account;
+import com.appalanche.backend.authentication.persistence.dao.RefreshToken;
 import com.appalanche.backend.security.helper.JwtHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import jakarta.servlet.http.Cookie;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +34,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +43,9 @@ import java.util.UUID;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
 import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
+import static java.time.Instant.now;
+import static java.time.temporal.ChronoUnit.*;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -54,7 +60,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 public class AccountIntegrationTests {
-    private final static UUID USER_ACCOUNT_ID = UUID.randomUUID();
+    private final static String USER_AGENT_HEADER = "Test-Runner 9.99.9";
+    private final static UUID USER_ACCOUNT_ID = randomUUID();
     private final static String USER_FIRST_NAME = "Test";
     private final static String USER_LAST_NAME = "User";
     private final static String USER_EMAIL = "test.user@gmail.com";
@@ -160,14 +167,43 @@ public class AccountIntegrationTests {
     @FieldSource("scenarios")
     void shouldLoginSuccessfullyWithValidInputs(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+
         var output = authenticateAccount(USER_PASSWORD, scenario);
         var response = output.andReturn().getResponse();
 
         var jwtCookie = response.getCookie("accessToken");
+        var actualAccountId = jwtHelper.extractAccountId(jwtCookie.getValue());
         output.andExpect(status().isOk());
         assertNotNull(jwtCookie);
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(jwtHelper.extractAccountId(jwtCookie.getValue())).isNotNull();
+        assertThat(actualAccountId).isNotNull();
+        expectRefreshTokenCount(actualAccountId, 1, 1, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldCullExtraRefreshTokensOnSuccessfulLogin(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL).get();
+        tokenRepository.save(createRefreshToken(createdAccount, USER_AGENT_HEADER, now()));
+        var expected1 = tokenRepository.save(createRefreshToken(createdAccount, "Firefox @ Mac OS X", now()));
+        tokenRepository.save(createRefreshToken(createdAccount, USER_AGENT_HEADER, now().minus(20, SECONDS)));
+        var expected2 = tokenRepository.save(createRefreshToken(createdAccount, "Chrome @ Windows 11", now()));
+        tokenRepository.save(createRefreshToken(createdAccount, "SHOULD CULL 1", now().minus(5, SECONDS)));
+        tokenRepository.save(createRefreshToken(createdAccount, "SHOULD CULL 2", now().minus(10, SECONDS)));
+
+        var output = authenticateAccount(USER_PASSWORD, scenario);
+        var response = output.andReturn().getResponse();
+
+        var jwtCookie = response.getCookie("accessToken");
+        var actualAccountId = jwtHelper.extractAccountId(jwtCookie.getValue());
+        var expectedTokens = List.of(expected1, expected2, tokenRepository.findByToken(response.getCookie("refreshToken")
+                                                                                               .getValue()).get());
+        output.andExpect(status().isOk());
+        assertNotNull(jwtCookie);
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(actualAccountId).isNotNull();
+        expectRefreshTokens(actualAccountId, expectedTokens, expectedTokens, scenario);
     }
 
     @ParameterizedTest
@@ -202,6 +238,66 @@ public class AccountIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldSuccessfullyRefreshTokensWithValidRefreshToken(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL).get();
+        var refreshToken = tokenRepository.save(createRefreshToken(createdAccount, USER_AGENT_HEADER, now().plus(1, DAYS)));
+
+        var output = refreshAccountTokens(createdAccount.getAccountId(), refreshToken.getToken(), scenario);
+        var response = output.andReturn().getResponse();
+
+        var jwtCookie = response.getCookie("accessToken");
+        var actualAccountId = jwtHelper.extractAccountId(jwtCookie.getValue());
+        var actualRefreshToken = tokenRepository.findByToken(response.getCookie("refreshToken").getValue()).get();
+        output.andExpect(status().isOk());
+        assertNotNull(jwtCookie);
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(actualAccountId).isNotNull();
+        assertThat(actualRefreshToken).usingRecursiveComparison()
+                                      .withEqualsForType((instant1, instant2) -> {
+                                                  if (instant1 == null || instant2 == null) {
+                                                      return false;
+                                                  }
+                                                  return instant1.truncatedTo(MILLIS)
+                                                                 .compareTo(instant2.truncatedTo(MILLIS)) <= 2500;
+                                              }, Instant.class
+                                      )
+                                      .withEqualsForType((account1, account2) -> {
+                                                  if (account1 == null || account2 == null) {
+                                                      return false;
+                                                  }
+                                                  return account1.getId().equals(account2.getId());
+                                              }, Account.class
+                                      )
+                                      .withEqualsForFields((token1, token2) -> {
+                                          if (!(token1 instanceof String) || !(token2 instanceof String)) {
+                                              return false;
+                                          }
+                                          return !token1.equals(token2);
+                                      }, "token")
+                                      .ignoringCollectionOrder()
+                                      .isEqualTo(refreshToken);
+        assertThat(jwtHelper.isTokenValid(jwtCookie.getValue(), createdAccount)).isTrue();
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldFailTokenRefreshingIfRefreshTokenMissing(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL).get();
+
+        var output = refreshAccountTokens(createdAccount.getAccountId(), null, scenario);
+        var response = output.andReturn().getResponse();
+
+        var jwtCookie = response.getCookie("accessToken");
+        output.andExpect(status().isUnauthorized());
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(jwtCookie).isNull();
+        expectRefreshTokenCount(createdAccount.getAccountId(), 0, 0, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldLogoutSuccessfullyWithValidAccessTokenButNoRefreshToken(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
         var createdAccount = accountRepository.findByEmail(USER_EMAIL);
@@ -219,15 +315,17 @@ public class AccountIntegrationTests {
     @FieldSource("scenarios")
     void shouldLogoutSuccessfullyWithValidAccessTokenAndRefreshToken(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
-        var createdAccount = accountRepository.findByEmail(USER_EMAIL);
-        var accountId = createdAccount.get().getAccountId();
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL).get();
+        var refreshToken = tokenRepository.save(createRefreshToken(createdAccount, "test 12.01", now()));
+        var accountId = createdAccount.getAccountId();
 
-        var output = logout(accountId, scenario);
+        var output = logoutWithRefresh(accountId, refreshToken.getToken(), scenario);
         var response = output.andReturn().getResponse();
 
         output.andExpect(expectedHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectedStatusCodeFor(scenario));
         assertLogoutResponse(response, scenario);
+        expectRefreshTokenCount(accountId, 0, 1, scenario);
     }
 
     @NotNull
@@ -256,11 +354,31 @@ public class AccountIntegrationTests {
         var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
 
         var request = post("/authenticate/login")
+                .header("User-Agent", USER_AGENT_HEADER)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestData));
 
         if (cookie != null) {
             request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
+    @NotNull
+    private ResultActions refreshAccountTokens(UUID accountId, String refreshToken, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var accessCookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+        var refreshCookie = new Cookie("refreshToken", refreshToken);
+
+        var request = post("/authenticate/refresh")
+                .header("User-Agent", USER_AGENT_HEADER)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        if (accessCookie != null) {
+            request.cookie(accessCookie, refreshCookie);
+        } else {
+            request.cookie(refreshCookie);
         }
 
         return mockMvc.perform(request);
@@ -289,6 +407,21 @@ public class AccountIntegrationTests {
 
         if (cookie != null) {
             request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
+    @NotNull
+    private ResultActions logoutWithRefresh(UUID accountId, String refreshToken, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var accessCookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+        var refreshCookie = new Cookie("refreshToken", refreshToken);
+
+        var request = post("/authenticate/logout").contentType(MediaType.APPLICATION_JSON);
+
+        if (accessCookie != null) {
+            request.cookie(accessCookie, refreshCookie);
         }
 
         return mockMvc.perform(request);
@@ -351,6 +484,51 @@ public class AccountIntegrationTests {
         }
     }
 
+    private void expectRefreshTokenCount(UUID accountId, long happyPathExpectation, long sadPathExpectation, SecurityScenario scenario) {
+        switch (scenario) {
+            case VALID_USER -> assertThat(getRefreshTokenCountFor(accountId)).isEqualTo(happyPathExpectation);
+            case MALFORMED_TOKEN,
+                 EXPIRED_TOKEN,
+                 MODIFIED_TOKEN,
+                 FAKE_TOKEN,
+                 NO_TOKEN -> assertThat(getRefreshTokenCountFor(accountId)).isEqualTo(sadPathExpectation);
+            default -> fail("Implement the case for " + scenario + "!");
+        }
+    }
+
+    private void expectRefreshTokens(UUID accountId, List<RefreshToken> happyPathExpectation, List<RefreshToken> sadPathExpectation, SecurityScenario scenario) {
+        var actualTokens = tokenRepository.findAllByAccount_AccountIdOrderByLastUsedAsc(accountId);
+        switch (scenario) {
+            case VALID_USER -> assertRefreshTokenListsEqual(happyPathExpectation, actualTokens);
+            case MALFORMED_TOKEN,
+                 EXPIRED_TOKEN,
+                 MODIFIED_TOKEN,
+                 FAKE_TOKEN,
+                 NO_TOKEN -> assertRefreshTokenListsEqual(sadPathExpectation, actualTokens);
+            default -> fail("Implement the case for " + scenario + "!");
+        }
+    }
+
+    private void assertRefreshTokenListsEqual(List<RefreshToken> expected, List<RefreshToken> actual) {
+        assertThat(actual).usingRecursiveComparison()
+                          .withEqualsForType((instant1, instant2) -> {
+                                      if (instant1 == null || instant2 == null) {
+                                          return false;
+                                      }
+                                      return instant1.truncatedTo(MILLIS).equals(instant2.truncatedTo(MILLIS));
+                                  }, Instant.class
+                          )
+                          .withEqualsForType((account1, account2) -> {
+                                      if (account1 == null || account2 == null) {
+                                          return false;
+                                      }
+                                      return account1.getId().equals(account2.getId());
+                                  }, Account.class
+                          )
+                          .ignoringCollectionOrder()
+                          .isEqualTo(expected);
+    }
+
     private void assertGenericEndpointResponse(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> fail("Implement the correct assertion!");
@@ -393,5 +571,13 @@ public class AccountIntegrationTests {
                             """);
             default -> fail("Implement the case for " + scenario + "!");
         }
+    }
+
+    private RefreshToken createRefreshToken(Account account, String deviceName, Instant lastUsed) {
+        return new RefreshToken(account, randomUUID(), randomUUID().toString(), deviceName, now().plus(10, SECONDS), lastUsed);
+    }
+
+    private long getRefreshTokenCountFor(UUID ownerAccountId) {
+        return tokenRepository.findAllByAccount_AccountIdOrderByLastUsedAsc(ownerAccountId).size();
     }
 }

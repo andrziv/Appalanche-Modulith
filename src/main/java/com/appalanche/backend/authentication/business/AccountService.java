@@ -96,7 +96,7 @@ public class AccountService {
             throw new TokenRefreshException("Refresh token expired, please login again");
         }
 
-        var account = getCurrentUser().orElseThrow();
+        var account = refreshToken.getAccount();
 
         if (!refreshToken.getAccount().getAccountId().equals(account.getAccountId())) {
             tokenRepository.delete(refreshToken);
