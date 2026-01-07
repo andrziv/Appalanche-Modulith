@@ -51,7 +51,7 @@ public class JobApplicationController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<JobApplicationModel> getJobApplication(@PathVariable Long id) {
         JobApplication application = jobApplicationService.getApplication(id);
-        return ResponseEntity.ok(jobApplicationModelAssembler.toModel(application));
+        return ResponseEntity.ok(jobApplicationModelAssembler.toModelWithDescription(application));
     }
 
     @PostMapping

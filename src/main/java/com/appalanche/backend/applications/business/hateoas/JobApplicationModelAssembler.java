@@ -27,4 +27,9 @@ public class JobApplicationModelAssembler extends RepresentationModelAssemblerSu
                                         .withAppliedDate(entity.getAppliedDate())
                                         .withResponseDate(entity.getResponseDate());
     }
+
+    @NonNull
+    public JobApplicationModel toModelWithDescription(JobApplication entity) {
+        return toModel(entity).withDescription(entity.getDescription());
+    }
 }

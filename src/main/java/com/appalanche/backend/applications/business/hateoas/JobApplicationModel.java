@@ -17,6 +17,7 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
     private JobApplicationStatus status;
     private JobApplicationExperience experience;
     private String jobPostingLink;
+    private String description;
     private Instant appliedDate;
     private Instant responseDate;
 
@@ -65,6 +66,11 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
         return this;
     }
 
+    public JobApplicationModel withDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
     public JobApplicationModel withAppliedDate(Instant appliedDate) {
         this.appliedDate = appliedDate;
         return this;
@@ -109,6 +115,10 @@ public class JobApplicationModel extends RepresentationModel<JobApplicationModel
 
     public String getJobPostingLink() {
         return jobPostingLink;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public Instant getAppliedDate() {

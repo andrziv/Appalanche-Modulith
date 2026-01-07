@@ -142,6 +142,24 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldGetFullSpecificOwnedJobApplicationWithId(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var status = statusRepository.save(status1());
+        var experience = experienceRepository.save(experience1());
+        var created = applicationRepository.save(validUserOneOwnedUniqueApplication(status, experience).withTitle("Principal Network Engineer")
+                                                                                                       .build());
+        var id = created.getId();
+
+        var output = getApplication(id, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertReturnedApplication(output.andReturn().getResponse(), created, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldGetAllReqIdOrCompanyOrTitleMatchesOnTextSearch(SecurityScenario scenario) throws Exception {
         clearAllRepositories();
         var status = statusRepository.save(status1());
@@ -1027,6 +1045,19 @@ class JobApplicationIntegrationTests {
     }
 
     @NotNull
+    private ResultActions getApplication(long id, SecurityScenario scenario) throws Exception {
+        var cookie = generateCookieForScenario(scenario, firstAccount(), USER_EMAIL_2, secretKey, jwtHelper);
+
+        var request = get("/application/" + id).contentType(MediaType.APPLICATION_JSON);
+
+        if (cookie != null) {
+            request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
+    @NotNull
     private ResultActions getAllApplications(SecurityScenario scenario) throws Exception {
         return getAllApplications("", scenario);
     }
@@ -1240,7 +1271,7 @@ class JobApplicationIntegrationTests {
                         });
                 assertThat(applications)
                         .usingRecursiveComparison()
-                        .ignoringFields("links", "id", "applicationId", "appliedDate", "responseDate", "createdAt")
+                        .ignoringFields("links", "id", "applicationId", "description", "appliedDate", "responseDate", "createdAt")
                         .withEqualsForType((status1, status2) ->
                                         status1.getCode().equals(status2.getCode()),
                                 JobApplicationStatus.class)
@@ -1249,6 +1280,34 @@ class JobApplicationIntegrationTests {
                                 JobApplicationExperience.class)
                         .ignoringCollectionOrder()
                         .isEqualTo(expectedApplications);
+            }
+            case MALFORMED_TOKEN,
+                 EXPIRED_TOKEN,
+                 MODIFIED_TOKEN,
+                 FAKE_TOKEN,
+                 NO_TOKEN -> assertGenericEndpointResponse(response, scenario);
+            default -> fail("Implement the case for " + scenario + "!");
+        }
+    }
+
+    private void assertReturnedApplication(MockHttpServletResponse response, JobApplication expectedApplication, SecurityScenario scenario) throws IOException {
+        switch (scenario) {
+            case VALID_USER -> {
+                var rootNode = objectMapper.readTree(response.getContentAsString());
+                var applications = objectMapper.readValue(
+                        rootNode.traverse(),
+                        new TypeReference<JobApplicationModel>() {
+                        });
+                assertThat(applications)
+                        .usingRecursiveComparison()
+                        .ignoringFields("links", "id", "applicationId", "appliedDate", "responseDate", "createdAt")
+                        .withEqualsForType((status1, status2) ->
+                                        status1.getCode().equals(status2.getCode()),
+                                JobApplicationStatus.class)
+                        .withEqualsForType((experience1, experience2) ->
+                                        experience1.getCode().equals(experience2.getCode()),
+                                JobApplicationExperience.class)
+                        .isEqualTo(expectedApplication);
             }
             case MALFORMED_TOKEN,
                  EXPIRED_TOKEN,
