@@ -40,13 +40,13 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
     - Returns:
         - `200: OK`, Returns content with the following info related to the account attached to the JWT:
             - Body Content:
-              - accountId (`UUID`)
-              - email (`String`)
-              - accessExpiryMilliseconds (`long`)
+                - accountId (`UUID`)
+                - email (`String`)
+                - accessExpiryMilliseconds (`long`)
 
-- `POST /authenticate/refresh`,
+- `POST /authenticate/refresh`, **requires a valid `refreshToken` cookie to successfully use**
     - Returns:
-        - `200: OK`, Returns a refreshed JWT as a Strict httpOnly cookie called "accessToken".
+        - `200: OK`, Returns refreshed `accessToken` and `refreshToken` Strict httpOnly cookies.
             - Body Content:
                 - accountId (`UUID`)
                 - email (`String`)
@@ -54,7 +54,31 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
 
 - `POST /authenticate/logout`, **requires a valid `accessToken` JWT cookie to access**
     - Returns:
-        - `200: OK`, Returns a dead/outdated JWT as a Strict httpOnly cookie called "accessToken".
+        - `200: OK`, Returns a dead/outdated JWT as a Strict httpOnly cookie called `accessToken`.
+
+### Account Endpoints
+
+- **You require a valid `accessToken` JWT cookie to access:**
+    - `PATCH /account/change-password`
+        - Required request body fields:
+            - oldPassword (`String`)
+            - newPassword (`String`)
+        - Returns:
+            - `200: OK`, Returns refreshed `accessToken` and `refreshToken` Strict httpOnly cookies.
+                - Body Content:
+                    - accountId (`UUID`)
+                    - email (`String`)
+                    - accessExpiryMilliseconds (`long`)
+    - `PATCH /account/change-email`
+        - Required request body fields:
+            - currentPassword (`String`)
+            - newEmail (`String`)
+        - Returns:
+            - `200: OK`, Returns refreshed `accessToken` and `refreshToken` Strict httpOnly cookies.
+                - Body Content:
+                    - accountId (`UUID`)
+                    - email (`String`)
+                    - accessExpiryMilliseconds (`long`)
 
 ### Profile Endpoints
 
