@@ -125,7 +125,7 @@ public class AccountProfileIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
-    void shouldSuccessfullyModifyAccountProfileWithValidToken(SecurityScenario scenario) throws Exception {
+    void shouldSuccessfullyModifyAccountProfileWithValidAccessToken(SecurityScenario scenario) throws Exception {
         registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
         UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
         var newFirstName = "New First";

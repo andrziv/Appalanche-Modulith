@@ -187,7 +187,7 @@ public class AccountIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
-    void shouldAuthenticateSuccessfullyWithValidToken(SecurityScenario scenario) throws Exception {
+    void shouldAuthenticateSuccessfullyWithValidAccessToken(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
         var createdAccount = accountRepository.findByEmail(USER_EMAIL);
         var accountId = createdAccount.get().getAccountId();
@@ -202,7 +202,22 @@ public class AccountIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
-    void shouldLogoutSuccessfullyWithValidToken(SecurityScenario scenario) throws Exception {
+    void shouldLogoutSuccessfullyWithValidAccessTokenButNoRefreshToken(SecurityScenario scenario) throws Exception {
+        registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
+        var createdAccount = accountRepository.findByEmail(USER_EMAIL);
+        var accountId = createdAccount.get().getAccountId();
+
+        var output = logout(accountId, scenario);
+        var response = output.andReturn().getResponse();
+
+        output.andExpect(expectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectedStatusCodeFor(scenario));
+        assertLogoutResponse(response, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldLogoutSuccessfullyWithValidAccessTokenAndRefreshToken(SecurityScenario scenario) throws Exception {
         registerAccount(USER_EMAIL, USER_PASSWORD, scenario);
         var createdAccount = accountRepository.findByEmail(USER_EMAIL);
         var accountId = createdAccount.get().getAccountId();
