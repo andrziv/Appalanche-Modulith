@@ -99,6 +99,8 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
         - Returns (paged according to HATEOAS spec):
             - jobApplicationModelList (List of `JobApplicationModel`, see `GET` endpoint below for the details of the
               `JobApplicationModel` fields)
+                - NOTE: The `description` field will ALWAYS be `null` when calling with the search endpoint.
+                  The real description can only be obtained through the ID `GET` endpoint below.
 
     - `GET /application/{id}`
         - Requires the following path field:
@@ -124,6 +126,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                     - label (`String`)
                     - description (`String`)
                 - jobPostingLink (`URL`)
+                - description (`String`)
                 - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
                 - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
 
@@ -136,6 +139,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - statusCode (`String`)
             - experienceLevelCode (`String`)
             - jobPostingLink (`URL`, HTTPS required)
+            - description (`String`)
             - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
             - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
@@ -155,6 +159,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - statusCode (`String`)
             - experienceLevelCode (`String`)
             - jobPostingLink (`URL`, HTTPS required)
+            - description (`String`)
             - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
             - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
         - Returns:
