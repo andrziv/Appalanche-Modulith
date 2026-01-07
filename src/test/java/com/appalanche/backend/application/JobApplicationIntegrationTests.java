@@ -505,11 +505,11 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link, description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -530,12 +530,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -556,12 +556,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -582,12 +582,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -608,12 +608,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -634,12 +634,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -660,12 +660,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, unknownStatusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
@@ -686,12 +686,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, unknownExperienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(resourceMissingHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectResourceMissingStatusCode(scenario));
@@ -764,12 +764,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -816,12 +816,12 @@ class JobApplicationIntegrationTests {
         String description = "description";
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 description, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -868,12 +868,12 @@ class JobApplicationIntegrationTests {
         var veryLongDescription = "A".repeat(15001);
         var appliedDate = Instant.now();
         var responseDate = Instant.now();
-        var currentApplicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var currentApplicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
 
         var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
                 veryLongDescription, appliedDate, responseDate, scenario);
 
-        var applicationSize = getApplicationAmountFor(USER_ACCOUNT_ID_1);
+        var applicationSize = getApplicationCountFor(USER_ACCOUNT_ID_1);
         var response = output.andReturn().getResponse();
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
         assertThat(response.getStatus()).isEqualTo(expectBadRequestStatusCode(scenario));
@@ -1480,7 +1480,7 @@ class JobApplicationIntegrationTests {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private long getApplicationAmountFor(UUID ownerAccountId) {
+    private long getApplicationCountFor(UUID ownerAccountId) {
         return applicationRepository.findAll()
                                     .stream()
                                     .filter(app -> app.getOwnerAccountId().equals(ownerAccountId))
