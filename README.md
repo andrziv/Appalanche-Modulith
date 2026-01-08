@@ -92,6 +92,11 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
                 - linkedInProfile (`String`, URL)
                 - gitHubProfile (`String`, URL)
                 - portfolioSite (`String`, URL)
+                - jobSites (`JobSite`)
+                    - siteId (`UUID`)
+                    - url (`String`)
+                    - name (`String`)
+
     - `PATCH /profile`
         - Optional request body fields:
             - firstname (`String`, if the field is present, it must have at least one non-whitespace char)
@@ -103,6 +108,18 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - To null out the object fields, you must set the related request fields to '' or " ". Having them be null
               or missing will NOT
               null the related object fields.
+        - Returns:
+            - `204: NO CONTENT`
+
+    - `POST /profile/job-sites` (adds a job site to a user)
+        - Required request body fields:
+            - url (`String`, doesn't even need to be a URL, can just be a domain)
+        - Returns:
+            - `201: CREATED`
+
+    - `POST /profile/job-sites/{id}`
+        - Required path field:
+            - id (`UUID`)
         - Returns:
             - `204: NO CONTENT`
 
