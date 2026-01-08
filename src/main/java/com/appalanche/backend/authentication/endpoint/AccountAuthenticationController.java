@@ -12,9 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 import static com.appalanche.backend.authentication.endpoint.CookieHelper.createJwtCookie;
 import static com.appalanche.backend.authentication.endpoint.CookieHelper.createRefreshCookie;
@@ -45,8 +44,7 @@ public class AccountAuthenticationController {
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
         var authenticatedAccount = bundle.account();
-        var responseContent = new LoginResponse(
-                authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = createLoginResponse(authenticatedAccount);
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -56,14 +54,10 @@ public class AccountAuthenticationController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LoginResponse> authenticate() {
-        Optional<Account> tokenAccount = accountService.getCurrentUser();
+        Account authenticatedAccount = accountService.getCurrentUser()
+                                                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (tokenAccount.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var authenticatedAccount = tokenAccount.get();
-        var responseContent = new LoginResponse(authenticatedAccount.getAccountId(), authenticatedAccount.getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = createLoginResponse(authenticatedAccount);
         return ResponseEntity.ok(responseContent);
     }
 
@@ -87,8 +81,7 @@ public class AccountAuthenticationController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
-        var responseContent = new LoginResponse(
-                bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -111,5 +104,10 @@ public class AccountAuthenticationController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), 0);
 
         return ResponseEntity.ok().header(SET_COOKIE, jwtCookie.toString()).build();
+    }
+
+    private LoginResponse createLoginResponse(Account account) {
+        return new LoginResponse(
+                account.getAccountId(), account.getEmail(), accountService.getJwtExpirationTime() * 1000);
     }
 }

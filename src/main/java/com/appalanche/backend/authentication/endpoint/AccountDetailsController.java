@@ -4,6 +4,7 @@ import com.appalanche.backend.authentication.business.AccountService;
 import com.appalanche.backend.authentication.business.request_response.ChangeEmailRequest;
 import com.appalanche.backend.authentication.business.request_response.ChangePasswordRequest;
 import com.appalanche.backend.authentication.business.request_response.LoginResponse;
+import com.appalanche.backend.authentication.persistence.dao.Account;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseCookie;
@@ -38,8 +39,7 @@ public class AccountDetailsController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
-        var responseContent = new LoginResponse(
-                bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
@@ -57,11 +57,15 @@ public class AccountDetailsController {
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
 
-        var responseContent = new LoginResponse(
-                bundle.account().getAccountId(), bundle.account().getEmail(), accountService.getJwtExpirationTime());
+        var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
                              .header(SET_COOKIE, jwtCookie.toString())
                              .header(SET_COOKIE, refreshCookie.toString())
                              .body(responseContent);
+    }
+
+    private LoginResponse createLoginResponse(Account account) {
+        return new LoginResponse(
+                account.getAccountId(), account.getEmail(), accountService.getJwtExpirationTime() * 1000);
     }
 }
