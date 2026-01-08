@@ -1,7 +1,7 @@
 package com.appalanche.backend.profiles.endpoint;
 
 import com.appalanche.backend.authentication.business.events.AccountCreationEvent;
-import com.appalanche.backend.profiles.persistence.AccountProfile;
+import com.appalanche.backend.profiles.persistence.dao.AccountProfile;
 import com.appalanche.backend.profiles.persistence.AccountProfileRepository;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
@@ -16,8 +16,7 @@ public class AccountProfileListener {
 
     @ApplicationModuleListener
     public void on(AccountCreationEvent event) {
-
-        AccountProfile profile = new AccountProfile(event.accountId(), event.firstName(), event.lastName(),
+        var profile = new AccountProfile(event.accountId(), event.firstName(), event.lastName(),
                 null, null, null);
 
         profileRepository.save(profile);

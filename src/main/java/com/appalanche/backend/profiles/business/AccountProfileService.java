@@ -1,8 +1,11 @@
 package com.appalanche.backend.profiles.business;
 
 import com.appalanche.backend.profiles.business.request_response.ModifyAccountProfileRequest;
-import com.appalanche.backend.profiles.persistence.AccountProfile;
+import com.appalanche.backend.profiles.config.KnownJobSiteHostProperties;
 import com.appalanche.backend.profiles.persistence.AccountProfileRepository;
+import com.appalanche.backend.profiles.persistence.JobSiteRepository;
+import com.appalanche.backend.profiles.persistence.dao.AccountProfile;
+import com.appalanche.backend.profiles.persistence.dao.JobSite;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
+import static com.appalanche.backend.profiles.business.UrlHelper.extractSiteName;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,9 +25,19 @@ public class AccountProfileService {
     private static final Logger logger = LoggerFactory.getLogger(AccountProfileService.class);
 
     private final AccountProfileRepository profileRepository;
+    private final JobSiteRepository siteRepository;
 
-    public AccountProfileService(AccountProfileRepository profileRepository) {
+    private final Map<String, String> hostSiteMappings;
+
+    public AccountProfileService(AccountProfileRepository profileRepository, JobSiteRepository siteRepository,
+                                 KnownJobSiteHostProperties hostSiteProperties) {
         this.profileRepository = profileRepository;
+        this.siteRepository = siteRepository;
+        this.hostSiteMappings = new HashMap<>();
+
+        for (KnownJobSiteHostProperties.KnownHostsConfig config : hostSiteProperties.getHosts()) {
+            hostSiteMappings.put(config.getHostname(), config.getDisplayName());
+        }
     }
 
     public AccountProfile getProfile() {
@@ -62,6 +79,35 @@ public class AccountProfileService {
             var portfolioSiteURL = request.portfolioSite();
             var newData = portfolioSiteURL.isBlank() ? null : portfolioSiteURL;
             profile.setPortfolioSite(newData);
+        }
+
+        profileRepository.save(profile);
+    }
+
+    @Transactional
+    public void addJobSiteToProfile(String url) {
+        var profile = profileRepository.findByAccountId(getCurrentAccountId()).orElseThrow();
+
+        var site = siteRepository.findByUrl(url)
+                                 .orElseGet(() -> {
+                                     var newSite = new JobSite(url, extractSiteName(url, hostSiteMappings));
+                                     return siteRepository.save(newSite);
+                                 });
+
+        profile.addJobSite(site);
+
+        profileRepository.save(profile);
+    }
+
+    @Transactional
+    public void removeJobSite(String url) {
+        var profile = profileRepository.findByAccountId(getCurrentAccountId()).orElseThrow();
+
+        for (JobSite jobSite : profile.getJobSites()) {
+            if (jobSite.getUrl().equals(url)) {
+                profile.removeJobSite(jobSite);
+                break;
+            }
         }
 
         profileRepository.save(profile);

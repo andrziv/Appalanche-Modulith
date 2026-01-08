@@ -1,10 +1,12 @@
-package com.appalanche.backend.profiles.persistence;
+package com.appalanche.backend.profiles.persistence.dao;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "account_profiles")
@@ -32,6 +34,10 @@ public class AccountProfile implements Serializable {
 
     @Column(name = "portfolio_site")
     private String portfolioSite;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "user_profile_sites", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "site_id"))
+    private final List<JobSite> jobSites = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -102,5 +108,19 @@ public class AccountProfile implements Serializable {
 
     public void setPortfolioSite(String portfolioSite) {
         this.portfolioSite = portfolioSite;
+    }
+
+    public List<JobSite> getJobSites() {
+        return new ArrayList<>(jobSites);
+    }
+
+    public void addJobSite(JobSite site) {
+        if (!jobSites.contains(site)) {
+            jobSites.add(site);
+        }
+    }
+
+    public void removeJobSite(JobSite site) {
+        jobSites.remove(site);
     }
 }

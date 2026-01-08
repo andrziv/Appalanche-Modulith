@@ -1,0 +1,26 @@
+appalanche:
+  known-hosts:
+    hosts:
+      - hostname: "github"
+        displayName: "GitHub"
+
+      - hostname: "stackoverflow"
+        displayName: "Stack Overflow"
+
+      - hostname: "linkedin"
+        displayName: "LinkedIn"
+
+      - hostname: "ziprecruiter"
+        displayName: "ZipRecruiter"
+
+      - hostname: "roberthalf"
+        displayName: "Robert Half"
+
+      - hostname: "echojobs"
+        displayName: "echojobs"
+
+      - hostname: "hiring"
+        displayName: "Hiring Cafe"
+
+      - hostname: "levels"
+        displayName: "Levels.fyi"

@@ -1,5 +1,6 @@
 package com.appalanche.backend.profiles.persistence;
 
+import com.appalanche.backend.profiles.persistence.dao.AccountProfile;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
