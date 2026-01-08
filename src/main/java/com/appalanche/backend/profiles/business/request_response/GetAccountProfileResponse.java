@@ -15,7 +15,7 @@ public record GetAccountProfileResponse(
         String gitHubProfile,
         String portfolioSite,
 
-        List<JobSite> jobSites) {
+        List<JobSiteDto> jobSites) {
 
     public static GetAccountProfileResponse from(AccountProfile profile) {
         return new GetAccountProfileResponse(
@@ -25,12 +25,16 @@ public record GetAccountProfileResponse(
                 profile.getLinkedInProfile(),
                 profile.getGitHubProfile(),
                 profile.getPortfolioSite(),
-                profile.getJobSites());
+                profile.getJobSites().stream().map(JobSiteDto::from).toList());
     }
 
     public record JobSiteDto(
+            UUID siteId,
             String name,
             String url
     ) {
+        static JobSiteDto from(JobSite site) {
+            return new JobSiteDto(site.getSiteId(), site.getName(), site.getUrl());
+        }
     }
 }

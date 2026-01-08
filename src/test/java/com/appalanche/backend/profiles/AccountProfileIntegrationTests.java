@@ -4,9 +4,13 @@ import com.appalanche.backend.authentication.business.events.AccountCreationEven
 import com.appalanche.backend.authentication.business.request_response.SignupRequest;
 import com.appalanche.backend.authentication.persistence.AccountRepository;
 import com.appalanche.backend.authentication.persistence.dao.Account;
+import com.appalanche.backend.profiles.business.request_response.AddJobSiteRequest;
+import com.appalanche.backend.profiles.business.request_response.GetAccountProfileResponse;
 import com.appalanche.backend.profiles.business.request_response.ModifyAccountProfileRequest;
-import com.appalanche.backend.profiles.persistence.dao.AccountProfile;
 import com.appalanche.backend.profiles.persistence.AccountProfileRepository;
+import com.appalanche.backend.profiles.persistence.JobSiteRepository;
+import com.appalanche.backend.profiles.persistence.dao.AccountProfile;
+import com.appalanche.backend.profiles.persistence.dao.JobSite;
 import com.appalanche.backend.security.helper.JwtHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,19 +40,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
 import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
+import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
@@ -58,7 +59,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @RecordApplicationEvents
 @Testcontainers
 public class AccountProfileIntegrationTests {
-    private final static UUID USER_ACCOUNT_ID = UUID.randomUUID();
+    private final static UUID USER_ACCOUNT_ID = randomUUID();
     private final static String USER_FIRST_NAME = "Test";
     private final static String USER_LAST_NAME = "User";
     private final static String USER_EMAIL = "test.user@gmail.com";
@@ -81,6 +82,9 @@ public class AccountProfileIntegrationTests {
     private AccountProfileRepository accountProfileRepository;
 
     @Autowired
+    private JobSiteRepository jobSiteRepository;
+
+    @Autowired
     private ApplicationEvents applicationEvents;
 
     @Container
@@ -101,6 +105,7 @@ public class AccountProfileIntegrationTests {
     void setUp() {
         accountRepository.deleteAll();
         accountProfileRepository.deleteAll();
+        jobSiteRepository.deleteAll();
     }
 
     @ParameterizedTest
@@ -138,7 +143,7 @@ public class AccountProfileIntegrationTests {
 
         var expectedAccount = new AccountProfile(accountId, newFirstName, newLastName, newLinkedIn, newGitHub, newPortfolio);
         output.andExpect(noContentHttpStatusMatcherFor(scenario));
-        assertAccountContentsGivenScenario(expectedAccount, output.andReturn().getResponse(), scenario);
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), output.andReturn().getResponse(), scenario);
     }
 
     @ParameterizedTest
@@ -155,7 +160,7 @@ public class AccountProfileIntegrationTests {
 
         var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(noContentHttpStatusMatcherFor(scenario));
-        assertAccountContentsGivenScenario(expectedAccount, output.andReturn().getResponse(), scenario);
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), output.andReturn().getResponse(), scenario);
     }
 
     @ParameterizedTest
@@ -176,7 +181,7 @@ public class AccountProfileIntegrationTests {
 
         var expectedAccount = new AccountProfile(otherAccountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(noContentHttpStatusMatcherFor(scenario));
-        assertAccountContentsGivenScenario(expectedAccount, output.andReturn().getResponse(), scenario);
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), output.andReturn().getResponse(), scenario);
     }
 
     @ParameterizedTest
@@ -195,7 +200,7 @@ public class AccountProfileIntegrationTests {
         var response = output.andReturn().getResponse();
         var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
-        assertAccountContentsGivenScenario(expectedAccount, response, scenario);
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), response, scenario);
         assertFailedValidationContent(response, "{\"firstname\":\"First name cannot be blank if provided\"}", scenario);
     }
 
@@ -215,8 +220,47 @@ public class AccountProfileIntegrationTests {
         var response = output.andReturn().getResponse();
         var expectedAccount = new AccountProfile(accountId, USER_FIRST_NAME, USER_LAST_NAME, null, null, null);
         output.andExpect(badRequestHttpStatusMatcherFor(scenario));
-        assertAccountContentsGivenScenario(expectedAccount, response, scenario);
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), response, scenario);
         assertFailedValidationContent(response, "{\"surname\":\"Last name cannot be blank if provided\"}", scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldAddJobSiteToAccountProfile(SecurityScenario scenario) throws Exception {
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
+        UUID accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
+        String jobSite = "https://test.com";
+
+        var output = addJobSite(accountId, jobSite, scenario);
+        var resultantProfile = getProfileViaUri(accountId, scenario);
+
+        var response = output.andReturn().getResponse();
+        var expectedAccount = resultantProfile.orElse(null);
+        output.andExpect(createdHttpStatusMatcherFor(scenario));
+        assertAccountContentsGivenScenario(expectedAccount, List.of(jobSite), response, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldRemoveJobSiteToAccountProfile(SecurityScenario scenario) throws Exception {
+        registerAccountAndWait(USER_EMAIL, USER_PASSWORD, scenario);
+        registerAccountAndWait(ATTACKER_EMAIL, USER_PASSWORD, scenario);
+        var accountId = accountRepository.findByEmail(USER_EMAIL).get().getAccountId();
+        var accountId2 = accountRepository.findByEmail(ATTACKER_EMAIL).get().getAccountId();
+        String jobSite = "https://test.com";
+        var jobSiteId = randomUUID();
+        jobSiteRepository.save(new JobSite(jobSiteId, jobSite, "Test"));
+        addJobSite(accountId, jobSite, scenario);
+        addJobSite(accountId2, jobSite, scenario);
+
+        var output = removeJobSite(accountId, jobSiteId, scenario);
+        var resultantProfile = getProfileViaUri(accountId, scenario);
+
+        var response = output.andReturn().getResponse();
+        var expectedAccount = resultantProfile.orElse(null);
+        output.andExpect(noContentHttpStatusMatcherFor(scenario));
+        assertAccountContentsGivenScenario(expectedAccount, List.of(), response, scenario);
+        assertThat(jobSiteRepository.findByUrl(jobSite)).isPresent();
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -281,6 +325,39 @@ public class AccountProfileIntegrationTests {
         return mockMvc.perform(request);
     }
 
+    @NotNull
+    private ResultActions addJobSite(UUID accountId, String url, SecurityScenario scenario) throws Exception {
+        var requestData = new AddJobSiteRequest(url);
+
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+
+        var request = post("/profile/job-sites")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestData));
+
+        if (cookie != null) {
+            request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
+    @NotNull
+    private ResultActions removeJobSite(UUID accountId, UUID id, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+
+        var request = delete("/profile/job-sites/" + id)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        if (cookie != null) {
+            request.cookie(cookie);
+        }
+
+        return mockMvc.perform(request);
+    }
+
     @SuppressWarnings({"ResultOfMethodCallIgnored", "SameParameterValue"})
     private void directlyModifyProfile(UUID accountId, String linkedInURL, String githubURL, String portfolioURL) {
         var potentialProfile = accountProfileRepository.findByAccountId(accountId);
@@ -300,6 +377,33 @@ public class AccountProfileIntegrationTests {
                                                      .withFailMessage("Direct GitHub update failed!");
         assertThat(updatedProfile.getPortfolioSite()).isEqualTo(portfolioURL)
                                                      .withFailMessage("Direct Portfolio update failed!");
+    }
+
+    private Optional<AccountProfile> getProfileViaUri(UUID accountId, SecurityScenario scenario) throws Exception {
+        var userAccount = new Account(accountId, USER_EMAIL, USER_PASSWORD);
+        var cookie = generateCookieForScenario(scenario, userAccount, ATTACKER_EMAIL, secretKey, jwtHelper);
+        var request = get("/profile");
+        if (cookie != null) {
+            request.cookie(cookie);
+        }
+
+        var response = mockMvc.perform(request).andReturn().getResponse();
+        var rootNode = objectMapper.readTree(response.getContentAsString());
+        var profileDto = objectMapper.readValue(
+                rootNode.traverse(),
+                new TypeReference<GetAccountProfileResponse>() {
+                });
+
+        if (profileDto.accountId() == null) {
+            return Optional.empty();
+        }
+
+        var incompleteProfile = new AccountProfile(profileDto.accountId(), profileDto.firstname(), profileDto.surname(),
+                profileDto.linkedInProfile(), profileDto.gitHubProfile(), profileDto.portfolioSite());
+        profileDto.jobSites().forEach(site ->
+                incompleteProfile.addJobSite(new JobSite(site.siteId(), site.url(), site.name())));
+
+        return Optional.of(incompleteProfile);
     }
 
     private static ResultMatcher noContentHttpStatusMatcherFor(SecurityScenario scenario) {
@@ -324,8 +428,18 @@ public class AccountProfileIntegrationTests {
         };
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void assertAccountContentsGivenScenario(AccountProfile expectedProfile, MockHttpServletResponse response, SecurityScenario scenario) throws IOException {
+    private static ResultMatcher createdHttpStatusMatcherFor(SecurityScenario scenario) {
+        return switch (scenario) {
+            case VALID_USER -> status().isCreated();
+            case MALFORMED_TOKEN,
+                 EXPIRED_TOKEN,
+                 MODIFIED_TOKEN,
+                 FAKE_TOKEN,
+                 NO_TOKEN -> status().isUnauthorized();
+        };
+    }
+
+    private void assertAccountContentsGivenScenario(AccountProfile expectedProfile, List<String> jobSites, MockHttpServletResponse response, SecurityScenario scenario) throws IOException {
         switch (scenario) {
             case VALID_USER -> {
                 var actualProfile = accountProfileRepository.findByAccountId(expectedProfile.getAccountId());
@@ -345,7 +459,6 @@ public class AccountProfileIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertFailedValidationContent(
             MockHttpServletResponse response, String expectedContent, SecurityScenario scenario) throws Exception {
         switch (scenario) {
@@ -359,7 +472,6 @@ public class AccountProfileIntegrationTests {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void assertGenericEndpointResponse(MockHttpServletResponse response, SecurityScenario scenario) throws UnsupportedEncodingException, JsonProcessingException {
         switch (scenario) {
             case VALID_USER -> fail("Implement the correct assertion!");

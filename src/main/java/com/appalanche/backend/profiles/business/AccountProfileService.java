@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.appalanche.backend.profiles.business.UrlHelper.extractSiteName;
+import static java.util.UUID.randomUUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -90,7 +91,7 @@ public class AccountProfileService {
 
         var site = siteRepository.findByUrl(url)
                                  .orElseGet(() -> {
-                                     var newSite = new JobSite(url, extractSiteName(url, hostSiteMappings));
+                                     var newSite = new JobSite(randomUUID(), url, extractSiteName(url, hostSiteMappings));
                                      return siteRepository.save(newSite);
                                  });
 
@@ -100,11 +101,11 @@ public class AccountProfileService {
     }
 
     @Transactional
-    public void removeJobSite(String url) {
+    public void removeJobSite(UUID siteId) {
         var profile = profileRepository.findByAccountId(getCurrentAccountId()).orElseThrow();
 
         for (JobSite jobSite : profile.getJobSites()) {
-            if (jobSite.getUrl().equals(url)) {
+            if (jobSite.getSiteId().equals(siteId)) {
                 profile.removeJobSite(jobSite);
                 break;
             }

@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RequestMapping("/profile")
@@ -35,14 +37,14 @@ public class AccountProfileController {
     }
 
     @PostMapping("/job-sites")
-    public ResponseEntity<Void> addJobSite(@RequestBody @Valid AddJobSiteRequest request) {
+    public ResponseEntity<Void> addJobSite(@Valid @RequestBody AddJobSiteRequest request) {
         profileService.addJobSiteToProfile(request.url());
         return ResponseEntity.status(CREATED).build();
     }
 
-    @DeleteMapping("/job-sites/{url}")
-    public ResponseEntity<Void> removeJobSite(@PathVariable String url) {
-        profileService.removeJobSite(url);
+    @DeleteMapping("/job-sites/{id}")
+    public ResponseEntity<Void> removeJobSite(@PathVariable UUID id) {
+        profileService.removeJobSite(id);
         return ResponseEntity.noContent().build();
     }
 }
