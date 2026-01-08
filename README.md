@@ -106,8 +106,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - portfolioSite (`String`, URL)
         - Notes on request body fields:
             - To null out the object fields, you must set the related request fields to '' or " ". Having them be null
-              or missing will NOT
-              null the related object fields.
+              or missing will NOT null the related object fields.
         - Returns:
             - `204: NO CONTENT`
 
@@ -217,6 +216,9 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - description (`String`)
             - appliedDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
             - responseDate (ISO 8601 `Date & Time`, format: `yyyy-MM-ddThh:mm:ssZ` e.g. `2025-12-27T18:50:00Z`)
+        - Notes:
+            - To null out the description field, you must set the related request fields to '' or " ". Having them be
+              null or missing will NOT null the related object fields.
         - Returns:
             - `204: NO CONTENT`
 

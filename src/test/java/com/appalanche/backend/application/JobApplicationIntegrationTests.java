@@ -477,6 +477,49 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldNullDescriptionOfExistingJobApplicationSuccessfullyIfDescriptionIsBlank(SecurityScenario scenario) throws Exception {
+        var oldRequisitionId = "R-997";
+        var oldTitle = "New Title";
+        var oldCompany = "old company";
+        int oldInterest = 9;
+        var oldLink = "https://newlink.com/test";
+        var oldDescription = "YepYepYerpYerp";
+        var oldAppliedDate = dateOffsetBy(-1);
+        var oldResponseDate = dateOffsetBy(-1);
+        var oldStatusDb = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
+        var oldExperienceDb = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
+        var existingApplication = applicationRepository.save(
+                new JobApplication(randomUUID(), oldRequisitionId, USER_ACCOUNT_ID_1, oldTitle, oldCompany, oldInterest,
+                        oldStatusDb, oldExperienceDb, oldLink, oldDescription, oldAppliedDate, oldResponseDate));
+        var applicationId = existingApplication.getApplicationId();
+
+        var output = modifyApplication(applicationId, null, null, null, null,
+                null, null, null, " ", null, null, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(noContentHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(expectNoResponseStatusCode(scenario));
+        assertApplicationDataUsingId(
+                applicationId,
+                existingApplication,
+                new JobApplication(
+                        randomUUID(),
+                        oldRequisitionId,
+                        USER_ACCOUNT_ID_1,
+                        oldTitle,
+                        oldCompany,
+                        oldInterest,
+                        oldStatusDb,
+                        oldExperienceDb,
+                        oldLink,
+                        null,
+                        oldAppliedDate,
+                        oldResponseDate),
+                scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldDeleteExistingJobApplicationSuccessfully(SecurityScenario scenario) throws Exception {
         var status = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
         var experience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));

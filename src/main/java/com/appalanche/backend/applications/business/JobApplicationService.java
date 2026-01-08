@@ -154,7 +154,11 @@ public class JobApplicationService {
         }
 
         if (request.description() != null) {
-            String sanitizedDescription = sanitizer.sanitize(request.description());
+            String sanitizedDescription = null;
+            if (!request.description().isBlank()) {
+                sanitizedDescription = sanitizer.sanitize(request.description());
+            }
+
             application.setDescription(sanitizedDescription);
         }
 
