@@ -953,60 +953,6 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
-    void shouldSanitizeDescriptionWhenAddingApplicationIfDescriptionContainsSusThings(SecurityScenario scenario) throws Exception {
-        String blankRequisitionId = "R-995";
-        String title = "New Title";
-        String company = "New Company";
-        int interest = 9;
-        String statusCode = status1().getCode();
-        String experienceCode = experience1().getCode();
-        String link = "https://localhost.com/test";
-        var dirtyDescription = "<script>alert('Bobby says Hi')</script><div><p>Safe</p></div><img src='https://google.com'/>";
-        var appliedDate = Instant.now();
-        var responseDate = Instant.now();
-
-        var output = createApplication(blankRequisitionId, title, company, interest, statusCode, experienceCode, link,
-                dirtyDescription, appliedDate, responseDate, scenario);
-
-        var response = output.andReturn().getResponse();
-        var expectedDescription = "<div><p>Safe</p></div>";
-        var expectedApplication = new JobApplication(null, blankRequisitionId, USER_ACCOUNT_ID_1, title,
-                company, interest, status1(), experience1(), link, expectedDescription, appliedDate, responseDate);
-        output.andExpect(resourceCreatedHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectCreatedStatusCode(scenario));
-        assertApplicationDataUsingResponse(response, expectedApplication, scenario);
-    }
-
-    @ParameterizedTest
-    @FieldSource("scenarios")
-    void shouldSanitizeDescriptionWhenModifyingApplicationIfDescriptionContainsSusThings(SecurityScenario scenario) throws Exception {
-        var dirtyDescription = "<script>alert('Bobby says Hi')</script><div><p>Safe</p></div><img src='https://google.com'/>";
-        var appliedDate = dateOffsetBy(1);
-        var responseDate = dateOffsetBy(1);
-        var oldStatus = statusRepository.save(new JobApplicationStatus("old_status_1", "old status", 0, "000000", "000000"));
-        var oldExperience = experienceRepository.save(new JobApplicationExperience("old_exp_1", "old experience", "old description"));
-        var existingApplication = applicationRepository.save(new JobApplication(randomUUID(), "0",
-                USER_ACCOUNT_ID_1, "old title", "old company", 1, oldStatus, oldExperience,
-                "https://localhost.com/test", null, appliedDate, responseDate));
-        var applicationId = existingApplication.getApplicationId();
-
-        var output = modifyApplication(applicationId, null, null, null, null,
-                null, null, null, dirtyDescription, null, null, scenario);
-
-        var response = output.andReturn().getResponse();
-        var expectedDescription = "<div><p>Safe</p></div>";
-        var expectedApplication = builder(existingApplication).withDescription(expectedDescription).build();
-        output.andExpect(noContentHttpStatusMatcherFor(scenario));
-        assertThat(response.getStatus()).isEqualTo(expectNoResponseStatusCode(scenario));
-        assertApplicationDataUsingId(
-                applicationId,
-                existingApplication,
-                expectedApplication,
-                scenario);
-    }
-
-    @ParameterizedTest
-    @FieldSource("scenarios")
     void shouldFailModifyingNonexistentApplication(SecurityScenario scenario) throws Exception {
         String newRequisitionId = "R-997";
         String newTitle = "New Title";

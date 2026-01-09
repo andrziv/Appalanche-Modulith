@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HtmlSanitizationConfig {
 
+    // TODO: Currently unused, sanitize all other user input.
     @Bean
     public PolicyFactory sanitizerPolicy() {
         return new HtmlPolicyBuilder()
