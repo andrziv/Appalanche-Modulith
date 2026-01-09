@@ -9,6 +9,7 @@ import com.appalanche.backend.applications.persistence.JobApplicationExperienceR
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
 import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import jakarta.persistence.EntityNotFoundException;
+import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,12 +30,14 @@ public class JobApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobApplicationStatusRepository statusRepository;
     private final JobApplicationExperienceRepository experienceRepository;
+    private final PolicyFactory sanitizer;
 
     public JobApplicationService(ApplicationRepository applicationRepository, JobApplicationStatusRepository statusRepository,
-                                 JobApplicationExperienceRepository experienceRepository) {
+                                 JobApplicationExperienceRepository experienceRepository, PolicyFactory sanitizer) {
         this.applicationRepository = applicationRepository;
         this.statusRepository = statusRepository;
         this.experienceRepository = experienceRepository;
+        this.sanitizer = sanitizer;
     }
 
     public JobApplication getApplication(UUID id) {
@@ -78,6 +81,11 @@ public class JobApplicationService {
             logger.warn("Response date detected to be before the Applied date on Application creation. Setting Applied date to Response date.");
         }
 
+        var description = request.description();
+        if (description != null) {
+            description = sanitizer.sanitize(description);
+        }
+
         JobApplication application =
                 new JobApplication(UUID.randomUUID(),
                         request.requisitionId(),
@@ -88,7 +96,7 @@ public class JobApplicationService {
                         status,
                         experience,
                         request.jobPostingLink(),
-                        request.description(),
+                        description,
                         appliedDate,
                         responseDate);
 
@@ -146,9 +154,12 @@ public class JobApplicationService {
         }
 
         if (request.description() != null) {
-            var description = request.description();
-            var newData = description.isBlank() ? null : description;
-            application.setDescription(newData);
+            String sanitizedDescription = null;
+            if (!request.description().isBlank()) {
+                sanitizedDescription = sanitizer.sanitize(request.description());
+            }
+
+            application.setDescription(sanitizedDescription);
         }
 
         if (request.appliedDate() != null) {
