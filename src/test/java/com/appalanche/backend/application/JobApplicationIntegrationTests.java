@@ -216,6 +216,58 @@ class JobApplicationIntegrationTests {
 
     @ParameterizedTest
     @FieldSource("scenarios")
+    void shouldGetAllApplicationsWithDesiredStatusCodeByFragmentExpansion(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var statusCandidate1 = statusRepository.save(status2());
+        var statusCandidate2 = statusRepository.save(status3());
+        var statusNonCandidate1 = statusRepository.save(status1());
+        var statusNonCandidate2 = statusRepository.save(status4());
+        var experience = experienceRepository.save(experience1());
+        var candidate1 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(statusCandidate1, experience).build());
+        var candidate2 = applicationRepository.save(
+                validUserOneOwnedUniqueApplication(statusCandidate2, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate1, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate2, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).withOwnerId(USER_ACCOUNT_ID_2)
+                                                                                                   .build());
+
+        var desiredStatusCodes = "STATUS_2";
+        var output = getAllApplications("statusCodes=" + desiredStatusCodes, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, List.of(candidate1, candidate2), scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
+    void shouldReturnNoApplicationsIfStatusCodeDoesNotExist(SecurityScenario scenario) throws Exception {
+        clearAllRepositories();
+        var statusCandidate1 = statusRepository.save(status2());
+        var statusCandidate2 = statusRepository.save(status3());
+        var statusNonCandidate1 = statusRepository.save(status1());
+        var statusNonCandidate2 = statusRepository.save(status4());
+        var experience = experienceRepository.save(experience1());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate2, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate1, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusNonCandidate2, experience).build());
+        applicationRepository.save(validUserOneOwnedUniqueApplication(statusCandidate1, experience).withOwnerId(USER_ACCOUNT_ID_2)
+                                                                                                   .build());
+
+        var desiredStatusCodes = "STATUS_*";
+        var output = getAllApplications("statusCodes=" + desiredStatusCodes, scenario);
+
+        var response = output.andReturn().getResponse();
+        output.andExpect(genericExpectedHttpStatusMatcherFor(scenario));
+        assertThat(response.getStatus()).isEqualTo(genericExpectedStatusCodeFor(scenario));
+        assertListOfReturnedApplications(response, null, scenario);
+    }
+
+    @ParameterizedTest
+    @FieldSource("scenarios")
     void shouldGetAllApplicationsWithDesiredExperienceCode(SecurityScenario scenario) throws Exception {
         clearAllRepositories();
         var status = statusRepository.save(status1());
@@ -1309,9 +1361,10 @@ class JobApplicationIntegrationTests {
         switch (scenario) {
             case VALID_USER -> {
                 var rootNode = objectMapper.readTree(response.getContentAsString());
-                var applications = objectMapper.readValue(
-                        rootNode.get("_embedded").get("jobApplicationModelList").traverse(),
-                        new TypeReference<List<JobApplicationModel>>() {
+                var embeddedOutput = rootNode.get("_embedded");
+                var potentialApplications = embeddedOutput == null ? null : embeddedOutput.get("jobApplicationModelList");
+                var applications = potentialApplications == null ? null : objectMapper.readValue(
+                        potentialApplications.traverse(), new TypeReference<List<JobApplicationModel>>() {
                         });
                 assertThat(applications)
                         .usingRecursiveComparison()

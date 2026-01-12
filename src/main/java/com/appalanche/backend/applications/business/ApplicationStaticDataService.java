@@ -6,10 +6,12 @@ import com.appalanche.backend.applications.persistence.JobApplicationExperienceR
 import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationExperience;
 import com.appalanche.backend.applications.persistence.dao.JobApplicationStatus;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -25,6 +27,35 @@ public class ApplicationStaticDataService {
         this.statusRepository = statusRepository;
         this.experienceRepository = experienceRepository;
         this.statusProperties = statusProperties;
+    }
+
+    JobApplicationExperience experienceByCode(String code) {
+        return experienceRepository.findByCode(code)
+                                   .orElseThrow(() -> {
+                                       var errorString = String.format("Either '%s' is an improper experience level code, " +
+                                               "or the code was not found in the database.", code);
+                                       return new EntityNotFoundException(errorString);
+                                   });
+    }
+
+    JobApplicationStatus statusByCode(String code) {
+        return statusRepository.findByCode(code)
+                               .orElseThrow(() -> {
+                                   var errorString = String.format("Either '%s' is an improper status code, " +
+                                           "or the code was not found in the database.", code);
+                                   return new EntityNotFoundException(errorString);
+                               });
+    }
+
+    List<String> expandStatusCodeFragment(String codeFragment) {
+        var codes = new HashSet<String>();
+        for (JobApplicationStatus status : statusRepository.findAll()) {
+            if (status.getCode().startsWith(codeFragment) || status.getCode().equals(codeFragment)) {
+                codes.add(status.getCode());
+            }
+        }
+
+        return codes.stream().toList();
     }
 
     public List<JobApplicationStatus> getAllStatuses() {

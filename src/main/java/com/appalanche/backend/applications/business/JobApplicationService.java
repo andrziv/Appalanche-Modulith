@@ -5,8 +5,6 @@ import com.appalanche.backend.applications.business.request_response.ModifyAppli
 import com.appalanche.backend.applications.business.request_response.SearchApplicationRequest;
 import com.appalanche.backend.applications.persistence.ApplicationRepository;
 import com.appalanche.backend.applications.persistence.ApplicationSpecificationFactory;
-import com.appalanche.backend.applications.persistence.JobApplicationExperienceRepository;
-import com.appalanche.backend.applications.persistence.JobApplicationStatusRepository;
 import com.appalanche.backend.applications.persistence.dao.JobApplication;
 import jakarta.persistence.EntityNotFoundException;
 import org.owasp.html.PolicyFactory;
@@ -20,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,15 +28,13 @@ public class JobApplicationService {
     private static final Logger logger = LoggerFactory.getLogger(JobApplicationService.class);
 
     private final ApplicationRepository applicationRepository;
-    private final JobApplicationStatusRepository statusRepository;
-    private final JobApplicationExperienceRepository experienceRepository;
+    private final ApplicationStaticDataService staticDataService;
     private final PolicyFactory sanitizer;
 
-    public JobApplicationService(ApplicationRepository applicationRepository, JobApplicationStatusRepository statusRepository,
-                                 JobApplicationExperienceRepository experienceRepository, PolicyFactory sanitizer) {
+    public JobApplicationService(ApplicationRepository applicationRepository,
+                                 ApplicationStaticDataService staticDataService, PolicyFactory sanitizer) {
         this.applicationRepository = applicationRepository;
-        this.statusRepository = statusRepository;
-        this.experienceRepository = experienceRepository;
+        this.staticDataService = staticDataService;
         this.sanitizer = sanitizer;
     }
 
@@ -46,7 +44,8 @@ public class JobApplicationService {
     }
 
     public Page<JobApplication> searchApplications(SearchApplicationRequest filter, Pageable pageable) {
-        Specification<JobApplication> spec = ApplicationSpecificationFactory.generateSpecificationList(filter, getCurrentAccountId());
+        var newFilter = processFilter(filter);
+        Specification<JobApplication> spec = ApplicationSpecificationFactory.generateSpecificationList(newFilter, getCurrentAccountId());
         return applicationRepository.findAll(spec, pageable);
     }
 
@@ -54,19 +53,8 @@ public class JobApplicationService {
     public JobApplication addApplication(AddApplicationRequest request) {
         logger.info("Received {} to AddApplication service method.", request);
 
-        var status = statusRepository.findByCode(request.statusCode())
-                                     .orElseThrow(() -> {
-                                         var errorString = String.format("Either '%s' is an improper status code, " +
-                                                 "or the code was not found in the database.", request.statusCode());
-                                         return new EntityNotFoundException(errorString);
-                                     });
-
-        var experience = experienceRepository.findByCode(request.experienceLevelCode())
-                                             .orElseThrow(() -> {
-                                                 var errorString = String.format("Either '%s' is an improper experience level code, " +
-                                                         "or the code was not found in the database.", request.experienceLevelCode());
-                                                 return new EntityNotFoundException(errorString);
-                                             });
+        var status = staticDataService.statusByCode(request.statusCode());
+        var experience = staticDataService.experienceByCode(request.experienceLevelCode());
 
         var appliedDate = request.appliedDate();
         if (appliedDate == null) {
@@ -113,23 +101,12 @@ public class JobApplicationService {
                                                .orElseThrow(() -> new EntityNotFoundException("Job application not found."));
 
         if (request.statusCode() != null) {
-            var newStatus = statusRepository.findByCode(request.statusCode())
-                                            .orElseThrow(() -> {
-                                                var errorString = String.format("Either '%s' is an improper status code, or the code was not found in the database.", request.statusCode());
-                                                return new EntityNotFoundException(errorString);
-                                            });
-
+            var newStatus = staticDataService.statusByCode(request.statusCode());
             application.setStatus(newStatus);
         }
 
         if (request.experienceLevelCode() != null) {
-            var newExperienceLevel = experienceRepository.findByCode(request.experienceLevelCode())
-                                                         .orElseThrow(() -> {
-                                                             var errorString = String.format("Either '%s' is an improper experience level code, " +
-                                                                     "or the code was not found in the database.", request.experienceLevelCode());
-                                                             return new EntityNotFoundException(errorString);
-                                                         });
-
+            var newExperienceLevel = staticDataService.experienceByCode(request.experienceLevelCode());
             application.setExperience(newExperienceLevel);
         }
 
@@ -170,8 +147,6 @@ public class JobApplicationService {
             application.setResponseDate(request.responseDate());
         }
 
-        // TODO: owner email changing logic perhaps?
-
         applicationRepository.save(application);
     }
 
@@ -189,5 +164,35 @@ public class JobApplicationService {
 
     private UUID getCurrentAccountId() {
         return UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    private SearchApplicationRequest processFilter(SearchApplicationRequest request) {
+        var expandedStatuses = expandStatuses(request.statusCodes());
+
+        return new SearchApplicationRequest(
+                request.search(),
+                expandedStatuses,
+                request.experienceLevelCodes(),
+                request.interestCriteria(),
+                request.appliedAfter(),
+                request.appliedBefore(),
+                request.responseAfter(),
+                request.responseBefore(),
+                request.timezone());
+    }
+
+    private List<String> expandStatuses(List<String> status) {
+        if (status == null) {
+            return null;
+        }
+
+        var expandedStatuses = new ArrayList<String>();
+        for (String statusFragment : status) {
+            var expandedCodes = staticDataService.expandStatusCodeFragment(statusFragment);
+            var searchCodes = expandedCodes.isEmpty() ? List.of(statusFragment) : expandedCodes;
+            expandedStatuses.addAll(searchCodes);
+        }
+
+        return expandedStatuses;
     }
 }

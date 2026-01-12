@@ -126,7 +126,7 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
 
 - Note that any Status or Experience Level related `String` inputs require the strings to be exactly one of the
   listed Code entries in the [Status Codes](#status-codes) or [Experience Codes](#experience-codes) sections below,
-  respectively.
+  respectively, unless otherwise specified.
 
 - **You require a valid `accessToken` JWT cookie to access:**
     - `GET /application`
@@ -149,6 +149,9 @@ attempt at something secure, while using Spring's configuration, data (Hibernate
             - responseBefore (ISO 8601 `Date`, format: `yyyy-MM-dd`)
             - timezone (`String`, TZ Identifier (e.g. `America/Toronto`))
         - Notes on request body fields:
+            - The statusCodes field could be fed with code-fragments to return every application with that status,
+              regardless of the round-count. For example, "statusCodes=INTERVIEW" will return applications with "
+              INTERVIEW_1" and "INTERVIEW_10".
             - The after/before dates are inclusive. An application with a responseDate of 2025-12-25T20:00:30Z will
               be caught by a "before" query at 2025-12-25.
         - Returns (paged according to HATEOAS spec):
