@@ -37,7 +37,8 @@ public class AccountDetailsController {
         var bundle = accountService.changePassword(request.oldPassword(), request.newPassword(), userAgent);
 
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
-        ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
+        ResponseCookie refreshCookie =
+                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
@@ -55,7 +56,8 @@ public class AccountDetailsController {
         var bundle = accountService.changeEmail(request.currentPassword(), request.newEmail(), userAgent);
 
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
-        ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
+        ResponseCookie refreshCookie =
+                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()

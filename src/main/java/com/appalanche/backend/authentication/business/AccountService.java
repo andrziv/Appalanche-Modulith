@@ -186,6 +186,10 @@ public class AccountService {
         return jwtDelegate.getExpirationTime() / 1000;
     }
 
+    public long getRefreshTokenExpirationTime() {
+        return (long) refreshTokenLifetime * 24 * 60 * 60;
+    }
+
     private void enforceSessionLimit(UUID accountId, String deviceName) {
         List<RefreshToken> sessions = tokenRepository.findAllByAccount_AccountIdOrderByLastUsedAsc(accountId);
 

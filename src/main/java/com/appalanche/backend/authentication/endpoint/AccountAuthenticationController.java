@@ -41,7 +41,8 @@ public class AccountAuthenticationController {
         var bundle = accountService.authenticate(request, userAgent);
 
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
-        ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
+        ResponseCookie refreshCookie =
+                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var authenticatedAccount = bundle.account();
         var responseContent = createLoginResponse(authenticatedAccount);
@@ -79,7 +80,8 @@ public class AccountAuthenticationController {
         var bundle = accountService.refresh(refreshToken);
 
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
-        ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken());
+        ResponseCookie refreshCookie =
+                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
