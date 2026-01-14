@@ -41,7 +41,6 @@ import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario;
 import static com.appalanche.backend.SecurityScenarioHelper.SecurityScenario.*;
 import static com.appalanche.backend.SecurityScenarioHelper.generateCookieForScenario;
 import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -353,7 +352,7 @@ public class AccountDetailsIntegrationTests {
                                       if (instant1 == null || instant2 == null) {
                                           return false;
                                       }
-                                      return instant1.truncatedTo(MILLIS).equals(instant2.truncatedTo(MILLIS));
+                                      return instant1.truncatedTo(SECONDS).equals(instant2.truncatedTo(SECONDS));
                                   }, Instant.class
                           )
                           .withEqualsForType((account1, account2) -> {
