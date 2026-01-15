@@ -8,7 +8,37 @@ import java.util.Locale;
 import java.util.Map;
 
 public class UrlHelper {
+    public static String cleanupUrl(String urlString) {
+        if (urlString == null || urlString.isBlank()) {
+            return "Unknown Site";
+        }
+
+        var urlChunks = urlString.split("://");
+        var recombobulatedUrl = urlString;
+
+        if (urlChunks.length > 2) {
+            recombobulatedUrl = urlChunks[urlChunks.length - 2] + "://" + urlChunks[urlChunks.length - 1];
+        }
+
+        try {
+            var protocol = new URI(recombobulatedUrl).getScheme();
+            if (protocol == null) {
+                return "https://" + recombobulatedUrl;
+            } else if (!protocol.equals("https")) {
+                return recombobulatedUrl.replace(protocol, "https");
+            }
+
+            return recombobulatedUrl;
+        } catch (URISyntaxException e) {
+            return "Unknown Site";
+        }
+    }
+
     public static String extractSiteName(String urlString, @Nullable Map<String, String> hostMappings) {
+        if (urlString == null || urlString.isBlank()) {
+            return "Unknown Site";
+        }
+
         try {
             if (!urlString.startsWith("http")) {
                 urlString = "https://" + urlString;
@@ -44,7 +74,7 @@ public class UrlHelper {
             return capitalize(host);
 
         } catch (URISyntaxException e) {
-            return "Link";
+            return "Unknown Site";
         }
     }
 

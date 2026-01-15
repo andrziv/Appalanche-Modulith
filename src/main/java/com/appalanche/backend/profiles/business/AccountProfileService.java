@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.appalanche.backend.profiles.business.UrlHelper.extractSiteName;
+import static com.appalanche.backend.profiles.business.UrlHelper.*;
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -91,7 +91,9 @@ public class AccountProfileService {
 
         var site = siteRepository.findByUrl(url)
                                  .orElseGet(() -> {
-                                     var newSite = new JobSite(randomUUID(), url, extractSiteName(url, hostSiteMappings));
+                                     var fullUrl = cleanupUrl(url);
+                                     var siteName = extractSiteName(fullUrl, hostSiteMappings);
+                                     var newSite = new JobSite(randomUUID(), fullUrl, siteName);
                                      return siteRepository.save(newSite);
                                  });
 
