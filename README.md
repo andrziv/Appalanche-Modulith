@@ -350,10 +350,10 @@ To run this project locally, you will need Java, Maven, and Docker installed.
       ```json
       {
           "type": "java",
-          "name": "Launch YourApplication",
+          "name": "Launch Appalanche",
           "request": "launch",
-          "mainClass": "com.yourpackage.YourApplication",
-          "projectName": "your-project-name",
+          "mainClass": "com.appalanche.backend.AppalancheModulithApplication",
+          "projectName": "appalanche-modulith",
           "envFile": "${workspaceFolder}/.env"
       }
       ```
@@ -375,7 +375,12 @@ To run this project locally, you will need Java, Maven, and Docker installed.
 ## Future Goals
 
 1) Add whatever features I deem interesting or useful to me, the only user (lol)
+    - Statistics provider
+      - Generic status breakdown, status breakdown for a company/experience level/resume/date range, or a combination?
+    - Email-reading service to automatically update the status of an application
     - Latex resume storage + Compiler? and to allow for Resume modification all on the site
+        - Tie it into the application portion so that the user can specify which resume (and/or) cover letter they used
+          for an application
     - Crawler functionality?
         - Crawling the web to look for available jobs and recommend certain ones to users
         - Crawling a provided link to automatically fill other fields in
