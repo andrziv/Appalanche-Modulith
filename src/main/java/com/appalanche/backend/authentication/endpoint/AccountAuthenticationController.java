@@ -104,8 +104,12 @@ public class AccountAuthenticationController {
         var bundle = accountService.logout(refreshToken);
 
         ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), 0);
+        ResponseCookie refreshCookie = createRefreshCookie(bundle.opaqueRefreshToken(), 0);
 
-        return ResponseEntity.ok().header(SET_COOKIE, jwtCookie.toString()).build();
+        return ResponseEntity.ok()
+                             .header(SET_COOKIE, jwtCookie.toString())
+                             .header(SET_COOKIE, refreshCookie.toString())
+                             .build();
     }
 
     private LoginResponse createLoginResponse(Account account) {

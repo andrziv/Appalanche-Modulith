@@ -19,7 +19,7 @@ public class CookieHelper {
         return ResponseCookie.from("refreshToken", refreshToken)
                              .httpOnly(true)
                              .secure(COOKIE_SECURE)
-                             .path("/authenticate/refresh")
+                             .path("/authenticate/")
                              .maxAge(age)
                              .sameSite("Strict")
                              .build();
