@@ -89,9 +89,9 @@ public class AccountProfileService {
     public void addJobSiteToProfile(String url) {
         var profile = profileRepository.findByAccountId(getCurrentAccountId()).orElseThrow();
 
-        var site = siteRepository.findByUrl(url)
+        var fullUrl = cleanupUrl(url);
+        var site = siteRepository.findByUrl(fullUrl)
                                  .orElseGet(() -> {
-                                     var fullUrl = cleanupUrl(url);
                                      var siteName = extractSiteName(fullUrl, hostSiteMappings);
                                      var newSite = new JobSite(randomUUID(), fullUrl, siteName);
                                      return siteRepository.save(newSite);
