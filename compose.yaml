@@ -12,7 +12,7 @@ services:
     env_file:
       - .env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - POSTGRES_USER=$PG_USERNAME
       - POSTGRES_PASSWORD=$PG_PASSWORD
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/$PG_DB_NAME
