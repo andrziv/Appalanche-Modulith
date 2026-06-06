@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.appalanche.backend.authentication.endpoint.CookieHelper.createJwtCookie;
-import static com.appalanche.backend.authentication.endpoint.CookieHelper.createRefreshCookie;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RequestMapping("/account")
 @RestController
 public class AccountDetailsController {
     private final AccountService accountService;
+    private final CookieHelper cookieHelper;
 
-    public AccountDetailsController(AccountService accountService) {
+    public AccountDetailsController(AccountService accountService, CookieHelper cookieHelper) {
         this.accountService = accountService;
+        this.cookieHelper = cookieHelper;
     }
 
     @PatchMapping("/change-password")
@@ -36,9 +36,10 @@ public class AccountDetailsController {
 
         var bundle = accountService.changePassword(request.oldPassword(), request.newPassword(), userAgent);
 
-        ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
+        ResponseCookie jwtCookie =
+                cookieHelper.createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie =
-                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
+                cookieHelper.createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()
@@ -55,9 +56,10 @@ public class AccountDetailsController {
 
         var bundle = accountService.changeEmail(request.currentPassword(), request.newEmail(), userAgent);
 
-        ResponseCookie jwtCookie = createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
+        ResponseCookie jwtCookie =
+                cookieHelper.createJwtCookie(bundle.jwtAccessToken(), accountService.getJwtExpirationTime());
         ResponseCookie refreshCookie =
-                createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
+                cookieHelper.createRefreshCookie(bundle.opaqueRefreshToken(), accountService.getRefreshTokenExpirationTime());
 
         var responseContent = createLoginResponse(bundle.account());
         return ResponseEntity.ok()

@@ -1,24 +1,28 @@
 package com.appalanche.backend.authentication.endpoint;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CookieHelper {
-    private static final boolean COOKIE_SECURE = false; // TODO: add some sort of nuance to this flag so it's properly required in non-dev enviros
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
 
-    static ResponseCookie createJwtCookie(String jwt, long age) {
+    ResponseCookie createJwtCookie(String jwt, long age) {
         return ResponseCookie.from("accessToken", jwt)
                              .httpOnly(true)
-                             .secure(COOKIE_SECURE)
+                             .secure(activeProfile.equals("prod"))
                              .path("/")
                              .maxAge(age)
                              .sameSite("Strict")
                              .build();
     }
 
-    static ResponseCookie createRefreshCookie(String refreshToken, long age) {
+    ResponseCookie createRefreshCookie(String refreshToken, long age) {
         return ResponseCookie.from("refreshToken", refreshToken)
                              .httpOnly(true)
-                             .secure(COOKIE_SECURE)
+                             .secure(activeProfile.equals("prod"))
                              .path("/authenticate/")
                              .maxAge(age)
                              .sameSite("Strict")
