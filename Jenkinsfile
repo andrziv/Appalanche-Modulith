@@ -61,6 +61,7 @@ pipeline {
             echo 'Setting GitHub commit status to SUCCESS'
             step([
                 $class: 'GitHubCommitStatusSetter',
+                reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/andrziv/Appalanche-Modulith'],
                 contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'Jenkins'],
                 statusResultSource: [
                     $class: 'ConditionalStatusResultSource',
@@ -74,6 +75,7 @@ pipeline {
             echo 'Setting GitHub commit status to FAILURE'
             step([
                 $class: 'GitHubCommitStatusSetter',
+                reposSource: [$class: 'ManuallyEnteredRepositorySource', url: 'https://github.com/andrziv/Appalanche-Modulith'],
                 contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'Jenkins'],
                 statusResultSource: [
                     $class: 'ConditionalStatusResultSource',
