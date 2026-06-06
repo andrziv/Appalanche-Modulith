@@ -30,14 +30,14 @@ public class SecurityConfiguration {
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
     }
 
-    // TODO: remove the actuator matcher
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(OPTIONS).permitAll()
-                    .requestMatchers("/authenticate/**", "/actuator/**").permitAll()
+                    .requestMatchers("/authenticate/**").permitAll()
+                    .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
